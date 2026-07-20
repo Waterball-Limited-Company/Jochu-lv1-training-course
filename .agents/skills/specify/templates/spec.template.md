@@ -1,0 +1,38 @@
+# 功能規格：{{FEATURE_NAME}}
+
+**功能分支**: `{{PLAN_PACKAGE}}`
+**建立日期**: {{CREATED_DATE}}
+**狀態**: 草稿
+
+# 原始需求
+
+- 初次輸入：{{INITIAL_REQUEST}}
+{{SUPPLEMENTAL_REQUEST_LINES}}
+
+## 使用者情境與測試 *(必填)*
+
+### 使用者故事 1 - {{USER_STORY_1_TITLE}} (優先級：{{USER_STORY_1_PRIORITY}})
+
+{{USER_STORY_1_NARRATIVE}}
+
+{{USER_STORY_1_FR_LINES}}
+
+**為何是這個優先序**: {{USER_STORY_1_PRIORITY_RATIONALE}}
+
+**如何獨立驗證此使用者故事**: {{USER_STORY_1_INDEPENDENT_TEST}}
+
+**邊界條件**:
+
+{{USER_STORY_1_BOUNDARY_CONDITION_LINES}}
+
+**驗收標準**:
+
+{{USER_STORY_1_ACCEPTANCE_CRITERIA_LINES}}
+
+---
+
+{{ADDITIONAL_USER_STORY_SECTIONS}}
+
+## 假設
+
+{{ASSUMPTION_LINES}}
