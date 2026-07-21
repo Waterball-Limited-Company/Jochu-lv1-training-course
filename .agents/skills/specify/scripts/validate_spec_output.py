@@ -8,137 +8,181 @@ from __future__ import annotations
 import argparse
 import re
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 
-STORY_HEADING_RE = re.compile(r"^### 使用者故事 \d+ - .+ \(優先級：P\d+\)$")
-FR_RE = re.compile(r"^- \*\*FR-\d{3}\*\*:")
-NUMBERED_ITEM_RE = re.compile(r"^\d+\. ")
-BULLET_ITEM_RE = re.compile(r"^- ")
+RE_STORY_HEADING = re.compile(r"^### 使用者故事 (\d+) - .+（優先級：P(\d+)）$", re.MULTILINE)
+RE_PLACEHOLDER = re.compile(r"\{\{[A-Z0-9_]+\}\}")
+RE_FR = re.compile(r"- \*\*US(\d+)-FR(\d+)\*\*：")
+RE_SC = re.compile(r"- \*\*US(\d+)-SC(\d+)\*\*：")
+RE_GR = re.compile(r"- \*\*GR-(\d+)\*\*：")
+RE_PACKAGE_NAME = re.compile(r"^\d{3}-.+$")
 
-TOP_LEVEL_HEADERS = [
-    "# 功能規格：",
-    "# 原始需求",
-    "## 使用者情境與測試 *(必填)*",
-    "## 假設",
-]
+
+@dataclass
+class StoryBlock:
+    number: int
+    start: int
+    end: int
+    text: str
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Validate the structure of a my-specify spec.md file."
+    parser = argparse.ArgumentParser(description="檢查 my-specify 產出的 spec 結構是否有效。")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--input", help="要直接檢查的 spec Markdown 檔案路徑")
+    group.add_argument("--package", help="要檢查的 NNN-plan-package；預設會對應到 specs/<package>/spec.md")
+    parser.add_argument(
+        "--workspace-root",
+        default=".",
+        help="workspace 根目錄；使用 --package 時會從此目錄推導 specs/<package>/spec.md",
     )
-    parser.add_argument("--input", required=True, help="Path to the spec.md file")
     return parser.parse_args()
 
 
-def find_story_ranges(lines: list[str]) -> list[tuple[int, int]]:
-    headings = [idx for idx, line in enumerate(lines) if STORY_HEADING_RE.match(line.strip())]
-    if not headings:
-        return []
-
-    assumption_index = next(
-        (idx for idx, line in enumerate(lines) if line.strip() == "## 假設"),
-        len(lines),
-    )
-
-    ranges: list[tuple[int, int]] = []
-    for position, start in enumerate(headings):
-        end = headings[position + 1] if position + 1 < len(headings) else assumption_index
-        ranges.append((start, end))
-    return ranges
-
-
-def has_item_after_label(section_lines: list[str], label: str, item_regex: re.Pattern[str]) -> bool:
-    for idx, line in enumerate(section_lines):
-        if line.strip() != label:
-            continue
-        cursor = idx + 1
-        while cursor < len(section_lines):
-            stripped = section_lines[cursor].strip()
-            if not stripped:
-                cursor += 1
-                continue
-            if item_regex.match(stripped):
-                return True
-            if stripped.startswith("**") or stripped.startswith("### ") or stripped == "---":
-                return False
-            cursor += 1
-    return False
-
-
-def validate_story(section_lines: list[str], story_number: int) -> list[str]:
-    errors: list[str] = []
-    section_text = "\n".join(section_lines)
-
-    required_markers = [
-        "**為何是這個優先序**:",
-        "**如何獨立驗證此使用者故事**:",
-        "**邊界條件**:",
-        "**驗收標準**:",
-    ]
-    for marker in required_markers:
-        if marker not in section_text:
-            errors.append(f"使用者故事 {story_number} 缺少區塊：{marker}")
-
-    if not any(FR_RE.match(line.strip()) for line in section_lines):
-        errors.append(f"使用者故事 {story_number} 缺少 FR 條目")
-
-    if "**邊界條件**:" in section_text and not has_item_after_label(
-        section_lines, "**邊界條件**:", BULLET_ITEM_RE
-    ):
-        errors.append(f"使用者故事 {story_number} 的邊界條件底下缺少條列項目")
-
-    if "**驗收標準**:" in section_text and not has_item_after_label(
-        section_lines, "**驗收標準**:", NUMBERED_ITEM_RE
-    ):
-        errors.append(f"使用者故事 {story_number} 的驗收標準底下缺少編號條目")
-
-    return errors
-
-
-def validate_spec(path: Path) -> list[str]:
-    errors: list[str] = []
-
+def load_text(path: Path) -> str:
     if not path.exists():
-        return [f"Input not found: {path}"]
+        raise FileNotFoundError(f"Input not found: {path}")
+    return path.read_text(encoding="utf-8")
 
-    content = path.read_text(encoding="utf-8")
-    lines = content.splitlines()
 
-    for header in TOP_LEVEL_HEADERS:
-        if header not in content:
-            errors.append(f"缺少必要章節：{header}")
+def resolve_input_path(args: argparse.Namespace) -> Path:
+    if args.input:
+        return Path(args.input)
 
-    story_ranges = find_story_ranges(lines)
-    if not story_ranges:
-        errors.append("至少需要一個 `### 使用者故事 N - ...` 區塊")
-        return errors
+    assert args.package is not None
+    if not RE_PACKAGE_NAME.match(args.package):
+        raise ValueError(
+            f"Invalid package name: {args.package}. Expected format like 001-photo-album-organizer"
+        )
 
-    fr_line_indexes = [idx for idx, line in enumerate(lines) if FR_RE.match(line.strip())]
-    for fr_index in fr_line_indexes:
-        if not any(start <= fr_index < end for start, end in story_ranges):
-            errors.append(f"第 {fr_index + 1} 行的 FR 不在任何使用者故事區塊內")
+    workspace_root = Path(args.workspace_root)
+    return workspace_root / "specs" / args.package / "spec.md"
 
-    for story_number, (start, end) in enumerate(story_ranges, start=1):
-        errors.extend(validate_story(lines[start:end], story_number))
 
-    return errors
+def build_story_blocks(text: str) -> list[StoryBlock]:
+    matches = list(RE_STORY_HEADING.finditer(text))
+    blocks: list[StoryBlock] = []
+    for index, match in enumerate(matches):
+        start = match.start()
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        blocks.append(
+            StoryBlock(
+                number=int(match.group(1)),
+                start=start,
+                end=end,
+                text=text[start:end],
+            )
+        )
+    return blocks
+
+
+def ensure_contiguous(values: list[int], label: str, errors: list[str]) -> None:
+    if not values:
+        errors.append(f"{label} 不可為空。")
+        return
+    expected = list(range(1, len(values) + 1))
+    if values != expected:
+        errors.append(f"{label} 必須連續遞增，目前為 {values}，預期為 {expected}。")
+
+
+def validate_story_structure(stories: list[StoryBlock], errors: list[str]) -> None:
+    story_numbers = [story.number for story in stories]
+    ensure_contiguous(story_numbers, "使用者故事編號", errors)
+
+    required_headings = [
+        "**為何列為此優先級**：",
+        "**獨立驗證方式**：",
+        "**功能需求**",
+        "**成功標準**",
+        "**驗收情境**",
+        "**邊界情境**",
+    ]
+
+    for story in stories:
+        for heading in required_headings:
+            if heading not in story.text:
+                errors.append(f"使用者故事 {story.number} 缺少區塊：{heading}")
+
+        fr_matches = [(int(a), int(b)) for a, b in RE_FR.findall(story.text)]
+        sc_matches = [(int(a), int(b)) for a, b in RE_SC.findall(story.text)]
+
+        if not fr_matches:
+            errors.append(f"使用者故事 {story.number} 至少需要一條 FR。")
+        if not sc_matches:
+            errors.append(f"使用者故事 {story.number} 至少需要一條 SC。")
+
+        fr_story_numbers = sorted({a for a, _ in fr_matches})
+        sc_story_numbers = sorted({a for a, _ in sc_matches})
+        if fr_story_numbers and fr_story_numbers != [story.number]:
+            errors.append(f"使用者故事 {story.number} 內的 FR 編號歸屬錯誤：{fr_story_numbers}")
+        if sc_story_numbers and sc_story_numbers != [story.number]:
+            errors.append(f"使用者故事 {story.number} 內的 SC 編號歸屬錯誤：{sc_story_numbers}")
+
+        fr_numbers = [b for _, b in fr_matches]
+        sc_numbers = [b for _, b in sc_matches]
+        if fr_numbers:
+            ensure_contiguous(fr_numbers, f"使用者故事 {story.number} 的 FR 編號", errors)
+        if sc_numbers:
+            ensure_contiguous(sc_numbers, f"使用者故事 {story.number} 的 SC 編號", errors)
+
+        if "**假設**" not in story.text or "**當**" not in story.text or "**則**" not in story.text:
+            errors.append(f"使用者故事 {story.number} 缺少完整的假設 / 當 / 則驗收情境。")
+
+
+def validate_global_rules(text: str, errors: list[str]) -> None:
+    if "## 共通規則與全域約束" in text:
+        gr_numbers = [int(num) for num in RE_GR.findall(text)]
+        if not gr_numbers:
+            errors.append("存在全域約束章節，但沒有 GR 條目。")
+        else:
+            ensure_contiguous(gr_numbers, "GR 編號", errors)
+        if "### 全域邊界情境" not in text:
+            errors.append("存在全域約束章節時，應包含全域邊界情境。")
+
+
+def validate_common_sections(text: str, errors: list[str]) -> None:
+    if not text.startswith("# 功能規格："):
+        errors.append("文件必須以 `# 功能規格：...` 開頭。")
+    if "## 使用者故事與驗證 *(必填)*" not in text:
+        errors.append("缺少 `## 使用者故事與驗證 *(必填)*` 章節。")
+
+    placeholders = RE_PLACEHOLDER.findall(text)
+    if placeholders:
+        errors.append(f"文件仍殘留 placeholder：{', '.join(sorted(set(placeholders)))}")
 
 
 def main() -> int:
     args = parse_args()
-    spec_path = Path(args.input)
-    errors = validate_spec(spec_path)
+    try:
+        input_path = resolve_input_path(args)
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    try:
+        text = load_text(input_path)
+    except FileNotFoundError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    errors: list[str] = []
+    validate_common_sections(text, errors)
+    stories = build_story_blocks(text)
+    if not stories:
+        errors.append("至少需要一個 `### 使用者故事 N - ...` 區塊。")
+    else:
+        validate_story_structure(stories, errors)
+    validate_global_rules(text, errors)
 
     if errors:
-        print("Spec validation failed:", file=sys.stderr)
+        print("SPEC VALIDATION FAILED", file=sys.stderr)
         for error in errors:
             print(f"- {error}", file=sys.stderr)
         return 1
 
-    story_count = len(find_story_ranges(spec_path.read_text(encoding="utf-8").splitlines()))
-    print(f"OK: validated {story_count} user story section(s) in {spec_path}")
+    print("SPEC VALIDATION PASSED")
     return 0
 
 

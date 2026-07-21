@@ -1,39 +1,43 @@
 ---
 name: my-specify
-description: 將自然語言產品需求整理成以 User Story 為主體、FR 與驗收標準都歸屬於故事內的繁體中文 spec，並輸出到 specs/<NNN-plan-package>/spec.md。
+description: 將使用者的產品需求敘述穩定轉成以 User Story 為主體的功能規格，先完成語意映射與故事切分，再依樣板產出 spec，並在輸出前做結構驗證。
 disable-model-invocation: true
 ---
 
 # My Specify
 
-將使用者以自然語言描述的產品需求，整理成可評估、可驗證、以 User Story 為主體的繁體中文 spec。此 skill 的目標不是直接做系統設計，而是先把需求邊界、故事切分、FR 歸屬、驗收標準、假設與待澄清缺口整理成穩定格式。
+把使用者 prompt 轉成可驗證的功能規格時，先建立單一溯源的語意映射，再依固定判準切出使用者故事、全域約束、待澄清項與成功標準，最後才回填 spec 樣板，並將產物統一收納在 `/specs/<NNN-plan-package>/`：語意映射寫入 `/specs/<NNN-plan-package>/spec-mapping-checklist.md`，最終規格寫入 `/specs/<NNN-plan-package>/spec.md`。若高影響缺口尚未拍板，必須先呼叫 `/clarify` 收斂，不得直接猜寫規格。
 
 # SOP
 
-## Phase 1 -- 收斂輸入與輸出契約
+## Phase 1 -- 收斂輸入與生成邊界
 
-1. READ 讀取使用者需求、現有上下文與 `templates/spec.example.md`，確認本次功能主題、主要角色、外部互動對象、明確範圍、非範圍與使用者已提供的約束。
-2. READ 讀取 `rules/輸入切分與範圍界定判準.md` 與 `rules/輸出檔案定位與plan-package判準.md`，確認如何把原始敘述切成 spec 輸入單位，以及最終 `spec.md` 的目錄命名方式。
-3. THINK 依本次已載入規則，整理 `初次輸入`、補充輸入、角色與外部互動者、範圍與非範圍、預計輸出的 `plan-package` 與目標檔案路徑。
+1. READ 讀取使用者需求、`NNN-plan-package` 與 `templates/spec.template.md`、`templates/spec.example.md`，確認本次要產出的 spec 結構、benchmark 風格、package 邊界，以及固定產物路徑 `/specs/<NNN-plan-package>/spec-mapping-checklist.md` 與 `/specs/<NNN-plan-package>/spec.md`。
+2. THINK 先根據已讀內容判斷本次輸入是否已足夠切分故事、約束與成功標準；若仍有會改變故事邊界、全域規則歸屬或待澄清標記的高影響缺口，準備進入澄清。
+3. DELEGATE 若高影響缺口尚未拍板，呼叫 `/clarify` 收斂 1 至 3 個最關鍵決策，收到使用者回答前停止後續 spec 生成。
 
-## Phase 2 -- 先處理高影響缺口
+## Phase 2 -- 完成語意映射與故事骨架
 
-1. READ 讀取 `rules/澄清缺口與假設標記判準.md`，確認哪些缺口必須先澄清，哪些可以先帶著顯式假設繼續。
-2. THINK 依本次已載入規則，盤點會改變故事邊界、角色權限、公開性、狀態轉換、付款與退款規則、或驗收單位的高影響缺口。
-3. DELEGATE 若仍有高影響缺口會改變 spec 主結構，呼叫 `/clarify` 先向使用者提問；若剩餘缺口屬局部不確定性，則在後續故事內以 `[NEED CLARIFICATION: ...]` 顯式標記，不自行腦補。
+1. READ 讀取 `rules/輸入正規化與語意切分判準.md`、`rules/使用者故事切分與合併判準.md`、`rules/使用者故事優先級排序判準.md`、`rules/功能需求歸屬與全域約束判準.md`，確認如何把輸入拆成語意片段、故事、優先級與全域規則。
+2. READ 讀取 `templates/spec-mapping-checklist.md` 與 `templates/spec-mapping-checklist.example.md`，確認語意映射結果應如何整理。
+3. THINK 依本次已載入規則，把原始需求正規化成最小語意片段，為每個片段標記類型、歸屬的故事候選、全域限制或待澄清缺口，並收斂故事數量、標題、順序與優先級。
+4. WRITE 依 `templates/spec-mapping-checklist.md` 產出語意映射結果，必要時先建立 `/specs/<NNN-plan-package>/`，再把映射檢查表寫入 `/specs/<NNN-plan-package>/spec-mapping-checklist.md`。
 
-## Phase 3 -- 切分使用者故事並回掛需求
+## Phase 3 -- 擴寫故事內容與規格細節
 
-1. READ 讀取 `rules/使用者故事切分與排序判準.md` 與 `rules/故事內需求與驗收歸屬判準.md`，確認如何切出可獨立驗證的故事，並把 FR、邊界條件與驗收標準回掛到對應故事內。
-2. THINK 依本次已載入規則，把需求整理成依價值與前置關係排序的 User Story，為每個故事補齊敘事、優先級、FR、優先序原因、獨立驗證方式、邊界條件與驗收標準。
+1. READ 讀取 `rules/成功標準生成判準.md`、`rules/驗收情境與邊界情境撰寫判準.md`、`rules/待澄清標記判準.md`，確認成功標準、驗收情境、邊界情境與待澄清標記的生成方式。
+2. READ 讀取 `/specs/<NNN-plan-package>/spec-mapping-checklist.md`，確認後續 spec 擴寫只建立在已收斂的語意映射上。
+3. THINK 依本次已載入規則，逐一擴寫每個使用者故事的描述、優先級理由、獨立驗證方式、功能需求、成功標準、驗收情境與邊界情境，並另外整理共通規則、全域邊界情境、關鍵實體與假設。
+4. WRITE 依 `templates/spec.template.md` 回填完整 spec，並將最終檔案寫入 `/specs/<NNN-plan-package>/spec.md`；所有 `FR` 與 `成功標準` 都必須掛在對應的使用者故事內，只有跨故事且永遠成立的限制才可放進 `共通規則與全域約束`。
 
-## Phase 4 -- 收斂跨故事資訊並寫出 spec
+## Phase 4 -- 檢查一致性並修補
 
-1. READ 讀取 `rules/跨故事資訊放置判準.md` 與 `templates/spec.template.md`，確認哪些資訊應留在全域區，哪些應只存在於個別故事內，以及最終骨架格式。
-2. THINK 依本次已載入規則，整理跨故事的共通限制、非目標、全域前提、權限限制、狀態名詞與其他不應重複散落的資訊，並收斂 `# 原始需求` 與 `## 假設` 內容。
-3. WRITE 依 `templates/spec.template.md` 的骨架與 `templates/spec.example.md` 的完成態，將結果寫入 `specs/<NNN-plan-package>/spec.md`。
+1. READ 讀取 `rules/產出一致性檢查清單.md`，逐項檢查輸出是否覆蓋所有輸入語意、故事結構是否完整、`FR` 與 `成功標準` 是否全數正確歸屬，以及全域規則與待澄清項是否放在正確位置。
+2. DELEGATE 執行 `uv run .agents/skills/my-specify/scripts/validate_spec_output.py --package <NNN-plan-package>`，檢查 `/specs/<NNN-plan-package>/spec.md` 的章節完整性、編號連續性、placeholder 殘留與基礎格式正確性。
+3. THINK 若 checklist 或 validator 失敗，回推是語意切分、故事歸屬、成功標準、情境撰寫或樣板回填出錯，並收斂最小修補範圍。
+4. WRITE 依修補結果更新 spec；若修補後仍失敗，回到前一 phase 重建對應內容。
 
-## Phase 5 -- 驗證結構與修正
+## Phase 5 -- 交付最終規格
 
-1. DELEGATE 執行 `uv run .agents/skills/my-specify/scripts/validate_spec_output.py --input specs/<NNN-plan-package>/spec.md`，檢查必要章節、User Story 區塊與 FR 歸屬是否完整。
-2. READ 回頭檢查最終 spec 是否符合本次已載入規則：User Story 是主要驗證單位、FR 與驗收標準都歸屬在故事內、跨故事資訊沒有重複散落、待澄清缺口有明確標記；若不符合，立即修正。
+1. READ 回頭檢查 `/specs/<NNN-plan-package>/spec.md` 是否符合 `spec.template.md` 的固定結構、`spec.example.md` 的 benchmark 風格與本次已載入規則；若不符合，立即修正。
+2. WRITE 交付 `/specs/<NNN-plan-package>/spec.md`，並在必要時簡要說明仍保留的 `[NEEDS CLARIFICATION: ...]` 項目。
