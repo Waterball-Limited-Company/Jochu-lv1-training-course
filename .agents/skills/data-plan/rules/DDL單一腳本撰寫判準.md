@@ -1,7 +1,7 @@
-# Rule 1 - DDL 必須是文末單一可執行 SQL 區塊
+# Rule 1 - DDL 必須是 DDL.md 內單一可執行 SQL 區塊
 
 - Level: `MUST`
-- 全部建表／索引語句寫在檔案 `## DDL` 內的同一個 `sql` code fence；不可拆成多個分散的完整腳本區塊。
+- 全部建表／索引語句寫在 `DDL.md` 的 `## DDL` 內同一個 `sql` code fence；不可拆成多個分散的完整腳本區塊，也不可寫回 `data-plan.md`。
 - 多表以 SQL comment 區隔，例如 `-- ========== albums ==========`。
 - 建表順序必須滿足外鍵依賴（被引用表先建）。
 
@@ -14,13 +14,11 @@
 CREATE TABLE albums (...);
 -- ========== photos ==========
 CREATE TABLE photos (...);
--- ========== album_photos ==========
-CREATE TABLE album_photos (...);
 ```
 
 ## Bad Example
 
-- 這個例子是壞的，因為把 DDL 拆回各實體底下。
+- 這個例子是壞的，因為把 DDL 拆回各實體或塞進 data-plan。
 
 ````md
 ## 實體：Album
@@ -28,32 +26,28 @@ CREATE TABLE album_photos (...);
 ```sql
 CREATE TABLE albums (...);
 ```
-
-## 實體：Photo
-
-```sql
-CREATE TABLE photos (...);
-```
 ````
 
-# Rule 2 - DDL 必須實作約束清單中的結構性約束
+# Rule 2 - DDL 必須實作可落庫的約束與設計脈絡結構項
 
 - Level: `MUST`
-- PRIMARY KEY、UNIQUE、CHECK、FOREIGN KEY、必要 INDEX，以及「不提供某欄位」這類結構禁令，應能對上約束清單的「所以」側。
-- 不可只在約束清單寫「全域唯一」，DDL 卻沒有 UNIQUE／唯一索引。
+- `CHECK`／`NOT NULL`／UNIQUE／必要 INDEX 應對齊 `data-plan.md` 約束清單中可落庫的欄位項。
+- `FOREIGN KEY`／級聯／「不提供某關聯欄位」應對齊本檔「設計脈絡」。
+- 不可只在文字寫「全域唯一」，DDL 卻沒有 UNIQUE／唯一索引。
 - 衍生不落庫的屬性不得出現在 `CREATE TABLE` 欄位中。
 
 ## Good Example
 
-- 這個例子是好的，因為唯一性在 DDL 可見。
+- 這個例子是好的，因為欄位約束與關聯結構都有落點。
 
-```sql
-CREATE UNIQUE INDEX ux_photos_source_path ON photos (source_path);
+```md
+約束：name 非空白 → name TEXT NOT NULL CHECK (trim(name) <> '')
+設計脈絡：刪相簿級聯刪照片 → ON DELETE CASCADE
 ```
 
 ## Bad Example
 
-- 這個例子是壞的，因為文字約束與 DDL 脫節。
+- 這個例子是壞的，因為文字與腳本脫節。
 
 ```md
 約束：source_path 全域唯一
@@ -65,7 +59,7 @@ DDL：photos 沒有 UNIQUE / unique index
 - Level: `SHOULD`
 - 預設以本機單機儲存可執行的 SQL（如 SQLite 語意）撰寫；實體欄位表可用 `TIMESTAMPTZ`／`BOOLEAN` 等邏輯型別，DDL 可用引擎實際型別落地。
 - 若邏輯型別與 DDL 型別不同，必須語意等價（例如 BOOLEAN ↔ INTEGER 0/1），不可 silently 改欄位意義。
-- 不在 data-plan 內夾帶 migration 工具專屬 DSL，除非使用者明確要求。
+- 不在 DDL.md 內夾帶 migration 工具專屬 DSL，除非使用者明確要求。
 
 ## Good Example
 

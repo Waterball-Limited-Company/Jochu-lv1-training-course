@@ -29,7 +29,7 @@
 
 ### Storage
 
-- SQLite（本機檔，語意對齊 `system-analyze/data-plan.md` 的 DDL）
+- SQLite（本機檔，語意對齊 `system-analyze/DDL.md`）
 - 照片原檔：記錄本機 `source_path`（不強制複製整份原圖進 app）
 - 縮圖：寫入 app-managed 目錄，供平鋪預覽
 
@@ -80,7 +80,8 @@ specs/001-photo-albums/
 ├── spec-mapping-checklist.md        # specify 對齊檢查
 ├── system-analyze/
 │   ├── technical-research.md        # 技術可行性研究（詳細 Decision／Rationale／Alternatives）
-│   ├── data-plan.md                 # 資料合約
+│   ├── data-plan.md                 # 資料實體合約
+│   ├── DDL.md                       # ERD／設計脈絡／DDL（有 DB 時）
 │   ├── api-plan.md                  # API 合約
 │   └── ui-plan.md                   # UI 合約
 └── task-plan/

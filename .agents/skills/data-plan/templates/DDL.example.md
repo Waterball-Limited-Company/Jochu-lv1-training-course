@@ -32,10 +32,9 @@ erDiagram
 
 ### 設計脈絡
 
-- 因為每張照片同一時間只會屬於一個相簿（GR-002、US1-FR4），所以 `albums` 與 `photos` 採 1:N，不設 M:N 中介表。
+- 因為每張照片同一時間只會屬於一個相簿（spec 假設），所以 `albums` 與 `photos` 採 1:N，不設 M:N 中介表。
 - 因為相簿不可巢狀（GR-001），所以不建立相簿對相簿的父子邊，亦不提供 `parent_album_id`。
 - 因為照片必須依附指定相簿存在（US1-FR2），所以刪除相簿時以 `ON DELETE CASCADE` 一併刪除所屬照片；反向刪光照片時不刪相簿（空相簿仍保留，見 data-plan 約束）。
-- 因為移動歸屬只需改所屬相簿（US1-FR4），所以以 `photos.album_id` 單外鍵覆寫表達，不另建歸屬歷史表。
 
 ---
 
@@ -61,9 +60,9 @@ CREATE TABLE photos (
   id TEXT PRIMARY KEY,
   album_id TEXT NOT NULL,
   display_name TEXT NOT NULL CHECK (trim(display_name) <> ''),
-  file_path TEXT NOT NULL UNIQUE,
+  file_path TEXT NOT NULL,
   thumbnail_path TEXT,
-  mime_type TEXT NOT NULL CHECK (mime_type IN ('image/jpeg', 'image/png', 'image/webp')),
+  mime_type TEXT NOT NULL CHECK (mime_type IN ('image/jpeg', 'image/png', 'image/heic')),
   created_at TEXT NOT NULL,
   FOREIGN KEY (album_id) REFERENCES albums (id) ON DELETE CASCADE
 );
@@ -78,4 +77,3 @@ CREATE INDEX ix_photos_album_id_created
 - 時間欄位以 `TEXT` 存 ISO-8601 字串，不另用引擎原生 datetime 型別
 - 建表順序固定為 `albums` → `photos`，以滿足外鍵依賴
 - `FOREIGN KEY`／級聯對齊上方「設計脈絡」；`CHECK`／必填／索引對齊 `data-plan.md` 約束清單中可落庫項；領域策略（如 `photo_count` 不落庫）不在本腳本建欄
-- 執行期需 `PRAGMA foreign_keys = ON`

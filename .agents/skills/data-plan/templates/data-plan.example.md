@@ -1,7 +1,7 @@
 # 資料計畫：照片相簿整理應用程式
 
 **功能分支**: `001-photo-albums`
-**建立日期**: 2026-07-22
+**建立日期**: 2026-07-21
 **狀態**: 草稿
 
 ## 實體：Album（相簿）
@@ -42,11 +42,11 @@
 | 欄位 | 型別 | 必填 | 說明 | 驗證規則 | 對應 User Story |
 | --- | --- | --- | --- | --- | --- |
 | `id` | TEXT | 系統產生 | 照片主鍵 | 主鍵，全域唯一 | — |
-| `album_id` | TEXT | 是 | 所屬相簿 | 外鍵，對應 `albums.id`（關聯與級聯見 `DDL.md` 設計脈絡；US1-FR2, US1-FR4） | US1 |
+| `album_id` | TEXT | 是 | 所屬相簿 | 外鍵，對應 `albums.id`（關聯與級聯見 `DDL.md` 設計脈絡；US1-FR2） | US1 |
 | `display_name` | TEXT | 是 | 列表／平鋪可辨識名稱 | 非空白 (US1-FR3) | US1, US4 |
-| `file_path` | TEXT | 是 | app-managed 目錄中的原檔相對路徑 | 非空白；路徑全域唯一 | US1 |
+| `file_path` | TEXT | 是 | app-managed 目錄中的原檔相對路徑 | 非空白 | US1 |
 | `thumbnail_path` | TEXT | 否 | app-managed 目錄中的縮圖相對路徑 | 縮圖失敗可為 null，降級顯示原檔 (US4-FR2) | US4 |
-| `mime_type` | TEXT | 是 | 影像 MIME 類型 | 限 `image/jpeg`、`image/png`、`image/webp` (US1-FR3) | US1 |
+| `mime_type` | TEXT | 是 | 影像 MIME 類型 | 限 `image/jpeg`、`image/png`、`image/heic` (US1-FR3) | US1 |
 | `created_at` | TEXT | 系統產生 | 加入相簿時間 | 預設 now()；平鋪預覽依此排序 | US4 |
 
 ### 範例資料輸出
@@ -57,7 +57,7 @@
   "album_id": "alb_01HZX2K9M3Q8R7N6P5T4V3W2X1",
   "display_name": "IMG_20260711_090015.jpg",
   "file_path": "uploads/pho_01HZX3A1B2C3D4E5F6G7H8J9K0.jpg",
-  "thumbnail_path": "thumbs/pho_01HZX3A1B2C3D4E5F6G7H8J9K0.webp",
+  "thumbnail_path": "thumbs/pho_01HZX3A1B2C3D4E5F6G7H8J9K0.jpg",
   "mime_type": "image/jpeg",
   "created_at": "2026-07-20T14:00:00+08:00"
 }
@@ -72,11 +72,10 @@
 - 因為相簿必須可辨識（US1-FR1），所以 `albums.name` 必填且非空白。
 - 因為主頁要依相簿建立日期分組（US2-FR2），所以分組鍵由 `albums.created_at` 的日期部分衍生，不另存可手動覆寫的分組欄位。
 - 因為拖放順序重開主頁後仍要保留（US3-FR2），所以 `albums.sort_order` 必填並持久化；重排僅在同一 `group_date` 分組內生效。
-- 因為只支援 JPEG／PNG／WebP（US1-FR3），所以 `photos.mime_type` 限上述三種值。
+- 因為只支援 JPG／PNG／HEIC（US1-FR3），所以 `photos.mime_type` 限上述三種值。
 - 因為照片列表／平鋪需要可辨識名稱（US1-FR3），所以 `photos.display_name` 必填且非空白。
 - 因為空相簿仍應顯示（US1 邊界情境），所以刪除相簿內所有照片後，相簿列仍保留。
 - 因為計數不可與歸屬列不一致，所以 `photo_count` 不落庫，改由 `photos` 計數。
-- 因為改歸屬時同一張照片不得同時屬於多個相簿（US1-FR4），所以每張照片只保留單一 `album_id` 欄位，移動時覆寫該欄。
 
 ## 假設
 
@@ -85,4 +84,3 @@
 - 上傳時原檔與縮圖皆寫入 app-managed 目錄；DB 只存相對路徑
 - `photo_count` 不落庫，由 `photos` 計數
 - 平鋪預覽排序固定依 `photos.created_at` 升冪；不另存可調欄數／排序偏好
-- 刪除相簿時一併刪除所屬照片與實體檔（級聯細節見 `DDL.md`）

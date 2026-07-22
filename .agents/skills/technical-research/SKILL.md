@@ -40,6 +40,6 @@ disable-model-invocation: true
 
 ## Phase 6 -- 驗證結構與修正
 
-1. DELEGATE 執行 `uv run .agents/skills/system-analyze/technical-research/scripts/validate_technical_research_output.py --input specs/<NNN-plan-package>/system-analyze/technical-research.md`，檢查 research 產物結構是否完整。
-2. DELEGATE 執行 `uv run .agents/skills/system-analyze/technical-research/scripts/validate_plan_output.py --input specs/<NNN-plan-package>/plan.md`，檢查 plan 產物結構是否完整。
+1. DELEGATE 執行 `uv run .agents/skills/technical-research/scripts/validate_technical_research_output.py --input specs/<NNN-plan-package>/system-analyze/technical-research.md`，檢查 research 產物結構是否完整。
+2. DELEGATE 執行 `uv run .agents/skills/technical-research/scripts/validate_plan_output.py --input specs/<NNN-plan-package>/plan.md`，檢查 plan 產物結構是否完整。
 3. READ 回頭檢查最終 research 與 plan 是否符合本次已載入規則；若不符合，立即修正。

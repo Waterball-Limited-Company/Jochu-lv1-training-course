@@ -6,13 +6,13 @@ disable-model-invocation: true
 
 # UI Plan
 
-將同 package 的 `spec.md`、`technical-research.md`（與可選的 `api-plan.md`、`data-plan.md`、clarify 決策）整理成可 Review 的人機介面合約：依業務邏輯切分跨頁 Sequence 並追溯 US／FR／AC；以可獨立到達的全頁為顆粒度，展開呈現內容、頁內操作 Flow、導覽與操作↔API 對應。非視覺 Design。
+將同 package 的 `spec.md`、`technical-research.md`（與可選的 `api-plan.md`、`data-plan.md`、`DDL.md`、clarify 決策）整理成可 Review 的人機介面合約：依業務邏輯切分跨頁 Sequence 並追溯 US／FR／AC；以可獨立到達的全頁為顆粒度，展開呈現內容、頁內操作 Flow、導覽與操作↔API 對應。非視覺 Design。
 
 # SOP
 
 ## Phase 1 -- 收斂輸入與輸出契約
 
-1. READ 讀取使用者需求、同 package 的 `spec.md`、`system-analyze/technical-research.md`、既有 `system-analyze/` 產物（若有 `api-plan.md`、`data-plan.md`）與 `templates/ui-plan.example.md`，確認功能主題、US／FR／AC 清單、技術選型、畫面與導覽線索。
+1. READ 讀取使用者需求、同 package 的 `spec.md`、`system-analyze/technical-research.md`、既有 `system-analyze/` 產物（若有 `api-plan.md`、`data-plan.md`、`DDL.md`）與 `templates/ui-plan.example.md`，確認功能主題、US／FR／AC 清單、技術選型、畫面與導覽線索。
 2. THINK 若 `technical-research.md` 不存在，停止後續步驟，先請使用者完成 `/technical-research` 或經 `/system-analyze` 主鏈產出。
 3. READ 讀取 `rules/輸出檔案定位判準.md`，確認最終 `ui-plan.md` 的目錄與檔名。
 4. THINK 依本次已載入規則，整理 `plan-package`、目標路徑、標題 metadata（功能分支／建立日期／狀態）與預計涵蓋的業務邏輯與頁面。
@@ -35,5 +35,5 @@ disable-model-invocation: true
 
 ## Phase 5 -- 驗證結構與修正
 
-1. DELEGATE 執行 `uv run .agents/skills/system-analyze/ui-plan/scripts/validate_ui_plan_output.py --input specs/<NNN-plan-package>/system-analyze/ui-plan.md`，檢查必要章節、業務邏輯與頁面結構是否完整。
+1. DELEGATE 執行 `uv run .agents/skills/ui-plan/scripts/validate_ui_plan_output.py --input specs/<NNN-plan-package>/system-analyze/ui-plan.md`，檢查必要章節、業務邏輯與頁面結構是否完整。
 2. READ 回頭檢查最終 ui-plan 是否符合本次已載入規則：業務邏輯連續編號並追溯 US／FR／AC、僅全頁算頁面、各頁含職責／呈現／Flow／導覽／API 對應、檔末 `## 假設` 章節存在、高影響未決已用 `[NEEDS CLARIFICATION]`（若有）、且不與 technical-research 主選型矛盾；若不符合，立即修正。
