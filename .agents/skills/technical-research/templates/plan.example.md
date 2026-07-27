@@ -16,45 +16,45 @@
 
 ## 技術背景
 
-### Language/Version
+### 使用語言／版本
 
 - Backend：Node.js 20 LTS（實作暫定；與 research 之 Node.js 選型對齊）
 - Frontend：ES2022 vanilla JavaScript（實作暫定；對齊「原生 ES modules」決策）
 
-### Primary Dependencies
+### 主要依賴
 
 - Backend：`express`、`multer`、`better-sqlite3`、`exifr`、`sharp`
 - Backend（可選）：`cors`（僅在前後端分 port 開發時需要；非 research 強制項）
 - Frontend：`Vite`（僅開發／建置依賴）；執行期零 runtime 依賴
 
-### Storage
+### 資料儲存
 
 - SQLite（本機檔，語意對齊 `system-analyze/DDL.md`）
 - 照片原檔：記錄本機 `source_path`（不強制複製整份原圖進 app）
 - 縮圖：寫入 app-managed 目錄，供平鋪預覽
 
-### Testing
+### 測試環境
 
 - Backend：Node.js 內建 `node:test`（API 合約／整合測試；實作暫定）
 - Frontend／端到端：以同 package 的 `e2e-test-plan.md` 與手動驗收為主
 - 規格層：`e2e-test-plan.md` 作為端到端情境來源
 
-### Target Platform
+### 開發平台
 
 - 現代 evergreen 瀏覽器
 - 主要場景：本機開發與單機使用（`localhost`）
 
-### Project Type
+### 專案類型
 
 - Web application
 - Monorepo：`backend/` + `frontend/`
 
-### Performance Goals
+### 效能目標
 
 - 建立相簿、加入／匯入照片、組內拖放重排、平鋪預覽等操作，目標在約 1 秒內反映於 UI（實作暫定體驗目標）
 - 單使用者；不要求高併發
 
-### Constraints
+### 技術約束
 
 - 最小依賴：前端不引入 React／Vue 等 framework；後端不引入 ORM
 - 前後端僅透過 REST API 溝通；前端不得直連資料庫
@@ -62,7 +62,7 @@
 - 相簿單層、不可巢狀
 - 第一版不做登入、雲端同步、跨裝置或多人共享
 
-### Scale/Scope
+### 實作規模／範圍
 
 - 單使用者／個人情境
 - 資料量：數十至數百本相簿、數百至數千張照片（教學／個人整理規模）
@@ -85,7 +85,9 @@ specs/001-photo-albums/
 │   ├── api-plan.md                  # API 合約
 │   └── ui-plan.md                   # UI 合約
 └── task-plan/
-    └── tdd-e2e-red.md               # 任務／TDD 計畫
+    ├── task-backend.md              # 後端實作計畫
+    ├── task-frontend.md             # 前端實作計畫
+    └── task-integration.md          # 整合實作計畫
 ```
 
 ### 原始碼（儲存庫根目錄）

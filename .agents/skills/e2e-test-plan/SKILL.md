@@ -1,30 +1,32 @@
 ---
 name: e2e-test-plan
-description: 依同 package 的 spec.md，將各 User Story 的驗收標準（AC）與邊界條件（Edge）轉成領域語言 Gherkin Scenario，並以對應欄位追溯 US／AC／Edge／FR，輸出到 specs/<NNN-plan-package>/e2e-test-plan.md。Use when the user invokes /e2e-test-plan, asks for E2E test plan / 端對端測試計畫 after specify（或下游分析完成後）, or needs to derive Gherkin scenarios from acceptance criteria.
+description: 依同 package 的 spec.md、api-plan.md 與 ui-plan.md，將各 User Story 的 AC／Edge 轉成領域語言 Gherkin Scenario，依落點寫入後端／前端／整合三區塊並對齊 API／UI，產出 specs/<NNN-plan-package>/e2e-test-plan.md。Use when the user invokes /e2e-test-plan, asks for E2E test plan / 端對端測試計畫 after system-analyze（api-plan 與 ui-plan 已完成）, or needs to derive layered Gherkin scenarios from acceptance criteria.
 disable-model-invocation: true
 ---
 
 # E2E Test Plan
 
-依同 package 的 `spec.md`，將各 User Story 的驗收標準（AC）與邊界條件（Edge）轉成領域語言 Gherkin Scenario；FR 只做覆蓋追溯。產出 `specs/<NNN-plan-package>/e2e-test-plan.md`。不讀取 `system-analyze/`，不綁定 API／UI 步驟。
+依同 package 的 `spec.md`、`system-analyze/api-plan.md`、`system-analyze/ui-plan.md`，將各 User Story 的驗收標準（AC）與邊界條件（Edge）轉成領域語言 Gherkin Scenario；依落點寫入 `## 後端`／`## 前端`／`## 整合`，對應欄位追溯 US／AC / Edge／FR 與 API 或 UI；檔末產出測試摘要總表。產出 `specs/<NNN-plan-package>/e2e-test-plan.md`。
 
 # SOP
 
-## Phase 1 -- 收斂 package 與輸出契約
+## Phase 1 -- 收斂輸入與輸出契約
 
-1. READ 讀取使用者需求、同 package 的 `spec.md` 與 `templates/e2e-test-plan.example.md`，確認功能主題、US／AC／Edge／FR 與既有約束。
-2. READ 讀取 `rules/輸出檔案定位判準.md`，確認最終 `e2e-test-plan.md` 的目錄與檔名。
-3. THINK 依本次已載入規則，整理 `plan-package`、目標路徑與標題 metadata（功能分支／建立日期／狀態）。
+1. READ 讀取使用者需求、同 package 的 `spec.md`、`system-analyze/api-plan.md`、`system-analyze/ui-plan.md` 與 `templates/e2e-test-plan.example.md`，確認功能主題、US／AC／Edge／FR、API／UI 合約與既有約束。
+2. THINK 若 `api-plan.md` 或 `ui-plan.md` 不存在，停止後續步驟，先請使用者完成對應計畫（或經 `/system-analyze` 主鏈產出）。
+3. READ 讀取 `rules/輸出檔案定位判準.md`，確認最終 `e2e-test-plan.md` 的目錄與檔名。
+4. THINK 依本次已載入規則，整理 `plan-package`、目標路徑與標題 metadata（功能分支／建立日期／狀態）。
 
 ## Phase 2 -- 掃描 NEED CLARIFICATION 並決定是否先澄清
 
-1. THINK 掃描 `spec.md` 各 US 邊界條件中的 `[NEED CLARIFICATION: ...]`（及依賴未澄清決策的邊界），列出將標為 blocked、本輪不產出 Scenario 的項目。
-2. DELEGATE 若存在上述項目，先詢問使用者是否呼叫 `/clarify` 釐清；若使用者同意則委派 `/clarify`，並在澄清結果回寫 `spec.md` 後重新進入本 phase；若使用者選擇暫不澄清，則帶著 blocked 清單繼續，不自行腦補行為。
+1. READ 讀取 `rules/Scenario產生與AC-Edge對齊判準.md` 中關於 blocked 的規則，確認未澄清邊界如何標示與是否可產出 Scenario。
+2. THINK 掃描 `spec.md` 各 US 邊界條件中的 `[NEED CLARIFICATION: ...]`（及依賴未澄清決策的邊界），列出將標為 blocked、本輪不產出 Scenario 的項目。
+3. DELEGATE 若存在上述項目，先詢問使用者是否呼叫 `/clarify` 釐清；若使用者同意則委派 `/clarify`，並在澄清結果回寫 `spec.md` 後重新進入本 phase；若使用者選擇暫不澄清，則帶著 blocked 清單繼續，不自行腦補行為。
 
-## Phase 3 -- 展開 Scenario 與對應欄位
+## Phase 3 -- 展開 Scenario、落點與對應欄位
 
-1. READ 讀取 `rules/Scenario產生與AC-Edge對齊判準.md`、`rules/Gherkin領域語言與步驟結構判準.md`、`rules/對應欄位與覆蓋總表判準.md`，確認 Scenario 切分、GWT 寫法與追溯格式。
-2. THINK 依本次已載入規則，依 US（含優先級）展開 Scenario、補齊對應欄位與元素覆蓋總表，並整理檔末假設。
+1. READ 讀取 `rules/Scenario產生與AC-Edge對齊判準.md`、`rules/落點與證明區塊判準.md`、`rules/Gherkin領域語言與步驟結構判準.md`、`rules/對應欄位與測試摘要總表判準.md`，確認 Scenario 切分、落點、GWT 寫法、對應欄位與摘要總表格式。
+2. THINK 依本次已載入規則，依 AC／Edge 決定後端／前端／整合落點，展開領域語言 Scenario、對齊 `api-plan`／`ui-plan`、補齊對應欄位與測試摘要總表，並整理檔末假設。
 
 ## Phase 4 -- 寫出 e2e-test-plan
 
@@ -33,5 +35,5 @@ disable-model-invocation: true
 
 ## Phase 5 -- 驗證覆蓋與修正
 
-1. DELEGATE 執行 `uv run .agents/skills/e2e-test-plan/scripts/validate_e2e_test_plan_output.py --input specs/<NNN-plan-package>/e2e-test-plan.md`，檢查必要結構、Scenario／覆蓋表與 Gherkin 家規。
+1. DELEGATE 執行 `uv run .agents/skills/e2e-test-plan/scripts/validate_e2e_test_plan_output.py --input specs/<NNN-plan-package>/e2e-test-plan.md`，檢查必要結構、三區塊 Scenario、對應欄位、摘要總表與 Gherkin 家規。
 2. READ 回頭檢查最終產物是否符合本次已載入規則；若不符合，立即修正。

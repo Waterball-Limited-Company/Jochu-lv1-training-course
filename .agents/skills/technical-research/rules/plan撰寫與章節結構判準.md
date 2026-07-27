@@ -61,15 +61,15 @@
 
 - Level: `MUST`
 - `## 技術背景` 下必須依序提供下列九個 `###` 小標，且每個小標底下至少一條 `- ` 內容：
-  - `Language/Version`
-  - `Primary Dependencies`
-  - `Storage`
-  - `Testing`
-  - `Target Platform`
-  - `Project Type`
-  - `Performance Goals`
-  - `Constraints`
-  - `Scale/Scope`
+  - `使用語言／版本`
+  - `主要依賴`
+  - `資料儲存`
+  - `測試環境`
+  - `開發平台`
+  - `專案類型`
+  - `效能目標`
+  - `技術約束`
+  - `實作規模／範圍`
 - 不可把九欄擠成單一密集段落；必須獨立小標 + 條列。
 
 ## Good Example
@@ -77,7 +77,7 @@
 - 這個例子是好的，因為欄位獨立、可掃讀。
 
 ```md
-### Storage
+### 資料儲存
 
 - SQLite（本機檔）
 - 縮圖寫入 app-managed 目錄
@@ -90,7 +90,7 @@
 ```md
 ## 技術背景
 
-**Language/Version:** … **Primary Dependencies:** … **Storage:** …
+**使用語言／版本:** … **主要依賴:** … **資料儲存:** …
 ```
 
 # Rule 4 - 專案結構順序固定為文件 → 原始碼 → 結構決策

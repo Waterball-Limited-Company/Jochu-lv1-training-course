@@ -16,47 +16,61 @@
 
 ## 技術背景
 
-### Language/Version
+### 使用語言／版本
 
 - Backend：Node.js 20 LTS（實作暫定；與 research 之 Node.js 選型對齊）
 - Frontend：ES2022 vanilla JavaScript（實作暫定；對齊「原生 ES modules」決策）
 
-### Primary Dependencies
+
+
+### 主要依賴
 
 - Backend：`express`、`multer`、`better-sqlite3`、`sharp`
 - Backend（可選）：`cors`（僅在未使用 Vite proxy 的分 port 開發時需要；非 research 強制項）
 - Frontend：`Vite`（僅開發／建置依賴）；執行期零 runtime 依賴
 
-### Storage
+
+
+### 資料儲存
 
 - SQLite（本機檔，語意對齊後續 `system-analyze/DDL.md`）
 - 照片原檔：複製至 app-managed 目錄，DB 存相對路徑
 - 縮圖：寫入 app-managed 目錄，供平鋪預覽
 - 相簿—照片：`photos.album_id` 一對多（1:N）
 
-### Testing
+
+
+### 測試環境
 
 - Backend：Node.js 內建 `node:test`（API 合約／整合測試；實作暫定）
 - Frontend／端到端：以同 package 的 `e2e-test-plan.md` 與手動驗收為主
 - 規格層：`e2e-test-plan.md` 作為端到端情境來源
 
-### Target Platform
+
+
+### 開發平台
 
 - 現代 evergreen 瀏覽器
 - 主要場景：本機開發與單機使用（`localhost`）
 - 互動假設：桌面或平板等較適合拖放的介面
 
-### Project Type
+
+
+### 專案類型
 
 - Web application
 - Monorepo：`backend/` + `frontend/`
 
-### Performance Goals
+
+
+### 效能目標
 
 - 建立相簿、匯入照片、組內拖放重排、平鋪預覽等操作，目標在約 1 秒內反映於 UI（實作暫定體驗目標）
 - 單使用者；不要求高併發
 
-### Constraints
+
+
+### 技術約束
 
 - 最小依賴：前端不引入 React／Vue 等 framework；後端不引入 ORM；不引入 EXIF 套件
 - 前後端僅透過 REST API 溝通；前端不得直連資料庫
@@ -64,13 +78,19 @@
 - 相簿單層、不可巢狀；一張照片同一時間只屬於一個相簿
 - 第一版不做登入、雲端同步、跨裝置或多人共享
 
-### Scale/Scope
+
+
+### 實作規模／範圍
 
 - 單使用者／個人情境
 - 資料量：數十至數百本相簿、數百至數千張照片（教學／個人整理規模）
 - 架構：前後端分離的單頁 Web App（SPA）
 
+
+
 ## 專案結構
+
+
 
 ### 文件（本功能）
 
@@ -78,17 +98,21 @@
 specs/001-photo-albums/
 ├── plan.md                          # 本檔（技術研究後總覽：Tech stack + 專案結構）
 ├── spec.md                          # 功能規格（/specify）
-├── e2e-test-plan.md                 # E2E 測試計畫（後續）
+├── e2e-test-plan.md                 # E2E 測試計畫（後端／前端／整合同檔）
 ├── spec-mapping-checklist.md        # specify 對齊檢查
-├── system-analyze/
-│   ├── technical-research.md        # 技術可行性研究（詳細 Decision／Rationale／Alternatives）
-│   ├── data-plan.md                 # 資料實體合約（按需）
-│   ├── DDL.md                       # ERD／設計脈絡／DDL（有 DB 時）
-│   ├── api-plan.md                  # API 合約（按需）
-│   └── ui-plan.md                   # UI 合約（按需）
-└── task-plan/
-    └── tdd-e2e-red.md               # 任務／TDD 計畫（後續）
+├── task-plan/
+│   ├── task-backend.md              # 後端實作計畫（環境建立 → US × R/G/Rf）
+│   ├── task-frontend.md             # 前端實作計畫
+│   └── task-integration.md          # 整合實作計畫（真串接）
+└── system-analyze/
+    ├── technical-research.md        # 技術可行性研究（詳細 Decision／Rationale／Alternatives）
+    ├── data-plan.md                 # 資料實體合約（按需）
+    ├── DDL.md                       # ERD／設計脈絡／DDL（有 DB 時）
+    ├── api-plan.md                  # API 合約（按需）
+    └── ui-plan.md                   # UI 合約（按需）
 ```
+
+
 
 ### 原始碼（儲存庫根目錄）
 
@@ -129,6 +153,8 @@ frontend/
 └── package.json                     # Vite 開發依賴
 ```
 
+
+
 ### 結構決策
 
 - 採 monorepo 的 Web application 結構：根目錄分 `backend/`（Node.js + Express）與 `frontend/`（Vite + vanilla）
@@ -136,3 +162,4 @@ frontend/
 - 不引入 service 層或 ORM；上傳（`multer`）、縮圖（`sharp`）由對應 `models`／`routes` 直接呼叫
 - 前端以功能檔案拆分（`api`／`render`／`main`，必要時加 `dnd`），全部使用原生 API
 - 因採 1:N 歸屬，不另設 `album_photos` model／route
+

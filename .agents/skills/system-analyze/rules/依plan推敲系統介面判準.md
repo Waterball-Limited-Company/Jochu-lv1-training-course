@@ -2,7 +2,7 @@
 
 - Level: `MUST`
 - 本次要跑哪些系統介面，必須由同 package 的 `plan.md` 推敲（必要時對照 `technical-research.md`），**不可**新增「交付範圍」或等價專用欄位當契約。
-- 推敲線索至少包含：技術選型概述、Language／Dependencies、Project Type、專案結構（有無 `backend/`／`frontend/`）、Storage、Constraints／選型中的否定句（例如「本期不做 Web UI」）。
+- 推敲線索至少包含：技術選型概述、使用語言／版本、主要依賴、專案類型、專案結構（有無 `backend/`／`frontend/`）、資料儲存、技術約束／選型中的否定句（例如「本期不做 Web UI」）。
 - 硬停對話必須列出「即將執行的介面清單」（含是否預期產出 `DDL.md`），讓使用者在回「繼續」前有機會改口。
 
 ## Good Example
@@ -10,7 +10,7 @@
 - 這個例子是好的，因為用既有欄位與否定句收斂介面，並在硬停時明示清單。
 
 ```md
-plan 線索：Dependencies 有 Backend＋Frontend；結構有 backend/ 與 frontend/；Storage 有 SQLite
+plan 線索：主要依賴有 Backend＋Frontend；結構有 backend/ 與 frontend/；資料儲存有 SQLite
 即將執行：data-plan（含 DDL.md）、api-plan、ui-plan
 ```
 
@@ -36,7 +36,7 @@ plan 沒有「交付範圍」三欄，無法判斷要不要跑 ui-plan，直接�
 - 這個例子是好的，因為後端 API-only 且有 SQLite 時跑 data＋DDL＋api，跳過 ui。
 
 ```md
-plan：僅 backend/、無 frontend/、Storage 有 SQLite、本期不做 Web UI
+plan：僅 backend/、無 frontend/、資料儲存有 SQLite、本期不做 Web UI
 委派：data-plan（含 DDL.md）、api-plan；跳過 ui-plan
 ```
 
@@ -45,7 +45,7 @@ plan：僅 backend/、無 frontend/、Storage 有 SQLite、本期不做 Web UI
 - 這個例子是壞的，因為有 SQLite 卻不把 DDL.md 列入必跑。
 
 ```md
-Storage: SQLite；齊全檢查只認 data-plan.md，忽略缺 DDL.md。
+資料儲存: SQLite；齊全檢查只認 data-plan.md，忽略缺 DDL.md。
 ```
 
 # Rule 3 - 齊全檢查只涵蓋本次必跑產物

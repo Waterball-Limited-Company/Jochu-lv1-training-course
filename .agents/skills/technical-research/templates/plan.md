@@ -16,39 +16,39 @@
 
 ## 技術背景
 
-### Language/Version
+### 使用語言／版本
 
 {{LANGUAGE_VERSION_ITEMS}}
 
-### Primary Dependencies
+### 主要依賴
 
 {{PRIMARY_DEPENDENCIES_ITEMS}}
 
-### Storage
+### 資料儲存
 
 {{STORAGE_ITEMS}}
 
-### Testing
+### 測試環境
 
 {{TESTING_ITEMS}}
 
-### Target Platform
+### 開發平台
 
 {{TARGET_PLATFORM_ITEMS}}
 
-### Project Type
+### 專案類型
 
 {{PROJECT_TYPE_ITEMS}}
 
-### Performance Goals
+### 效能目標
 
 {{PERFORMANCE_GOALS_ITEMS}}
 
-### Constraints
+### 技術約束
 
 {{CONSTRAINTS_ITEMS}}
 
-### Scale/Scope
+### 實作規模／範圍
 
 {{SCALE_SCOPE_ITEMS}}
 

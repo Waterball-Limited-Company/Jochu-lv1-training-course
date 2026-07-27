@@ -29,15 +29,15 @@ SUMMARY_SUBHEADINGS = (
 )
 
 TECH_BACKGROUND_SUBHEADINGS = (
-    "### Language/Version",
-    "### Primary Dependencies",
-    "### Storage",
-    "### Testing",
-    "### Target Platform",
-    "### Project Type",
-    "### Performance Goals",
-    "### Constraints",
-    "### Scale/Scope",
+    "### 使用語言／版本",
+    "### 主要依賴",
+    "### 資料儲存",
+    "### 測試環境",
+    "### 開發平台",
+    "### 專案類型",
+    "### 效能目標",
+    "### 技術約束",
+    "### 實作規模／範圍",
 )
 
 STRUCTURE_SUBHEADINGS = (
@@ -177,7 +177,7 @@ def validate_tech_background(lines: list[str]) -> list[str]:
         expected_order = list(range(len(positions)))
         order_by_appearance = sorted(range(len(positions)), key=lambda i: positions[i])
         if order_by_appearance != expected_order:
-            errors.append("技術背景 nine headings must keep Speckit field order")
+            errors.append("技術背景九個小標必須維持固定順序")
     return errors
 
 

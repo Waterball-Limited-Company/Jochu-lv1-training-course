@@ -1,0 +1,287 @@
+# 實作計畫（前端）：照片相簿整理應用程式
+
+**功能分支**: `001-photo-albums`  
+**建立日期**: 2026-07-27  
+**狀態**: 草稿
+
+---
+
+## 1. 規格閱讀
+
+- [ ] 已讀 `plan.md`（Vite + Vanilla、`frontend/` 結構）
+- [ ] 已讀 `technical-research.md`（原生 fetch／DOM／Drag and Drop）
+- [ ] 已讀 `ui-plan.md`（主頁／相簿詳情、業務邏輯 1–4）
+- [ ] 已讀 `api-plan.md`（前端呼叫形狀；本層可用 Mock）
+- [ ] 已讀 `e2e-test-plan.md` 的 `## 前端`
+- [ ] 確認前端 Scenario 無 blocked 項
+
+```bash
+ls specs/001-photo-albums/plan.md \
+   specs/001-photo-albums/system-analyze/technical-research.md \
+   specs/001-photo-albums/system-analyze/ui-plan.md \
+   specs/001-photo-albums/system-analyze/api-plan.md \
+   specs/001-photo-albums/e2e-test-plan.md
+```
+
+---
+
+
+
+## 2. 環境建立
+
+
+
+### 2.1 工具與目錄
+
+- [ ] 確認本機 Node 為 20.x LTS
+
+```bash
+node -v
+```
+
+- [ ] 建立 `frontend/` 骨架（對齊 `plan.md`：`index.html`、`src/`、`vite.config.js`）
+
+```bash
+mkdir -p frontend/src
+ls -ld frontend frontend/src
+```
+
+
+
+### 2.2 套件與開發伺服器
+
+- [ ] 初始化前端套件並加入 Vite
+- [ ] 設定開發期 proxy：`/api`、`/media` 指向後端
+- [ ] 確認 `npm run dev`（或等效）可啟動
+
+```bash
+cd frontend
+npm pkg get scripts
+```
+
+
+
+### 2.3 測試／驗收基建
+
+- [ ] 選定前端 Scenario 證明方式（瀏覽器 UI；API 可 Mock 對齊 api-plan 形狀）
+- [ ] 最小 smoke：頁面可載入、進入點可執行
+
+---
+
+
+
+## 3. User Story 實作計劃
+
+
+
+### US-1 建立相簿並整理照片（優先級：P1）
+
+
+
+#### AC / Edge
+
+- AC-1-1 假設使用者尚未建立任何相簿，當建立一個名為「旅行」的相簿並一次匯入多張 JPEG、PNG 與 WebP 照片，則系統應顯示「旅行」相簿且內含這些照片
+- AC-1-2 假設使用者已建立多個相簿且某張照片已屬於相簿 A，當使用者將該照片加入相簿 B，則該照片應只出現在相簿 B，且不再出現在相簿 A
+- Edge-G-2 當系統偵測到會造成同一張照片同時屬於多個相簿的操作時，必須改為將該照片移動到目標相簿，不得保留多重歸屬
+- Edge-1-1 當使用者建立空相簿但尚未加入照片時，系統仍應顯示該相簿
+- Edge-1-2 當使用者選取不支援的檔案格式時，系統應拒絕匯入並說明僅支援 JPEG、PNG、WebP
+- Edge-G-1 當使用者嘗試以任何操作把相簿放進另一個相簿中時，系統必須阻止此行為
+
+
+
+#### Red
+
+- [ ] `/tdd-e2e-red` — S-1-1 建立「旅行」相簿並一次匯入多格式照片:
+  - 實作計畫：
+    - 以 UI 流程證明（API 可 Mock，形狀對齊 api-plan）
+    - 主頁 Modal → `POST /albums` → 導向相簿詳情
+    - 批次選檔 → `POST /albums/:id/photos` → 平鋪區可見已加入照片（ui-plan 業務邏輯 1）
+- [ ] `/tdd-e2e-red` — S-1-2 將已歸屬照片改加入另一相簿後只留在目標相簿:
+  - 實作計畫：
+    - 相簿詳情「移至其他相簿」呼叫 `PATCH /photos/:id`
+    - 目標清單來自 `GET /albums` 展開（排除目前相簿）
+    - 成功後原相簿平鋪區不再顯示該照片
+- [ ] `/tdd-e2e-red` — S-1-3 空相簿尚未加入照片時仍應顯示:
+  - 實作計畫：
+    - Mock／呼叫 `GET /albums` 含 `photo_count` 為 0 的相簿
+    - 主頁日期分組列表仍渲染該相簿項目
+- [ ] `/tdd-e2e-red` — S-1-4 選取不支援格式時拒絕匯入並說明支援範圍:
+  - 實作計畫：
+    - 上傳失敗時呈現 415（或 Mock 等價）錯誤文案
+    - 說明僅支援 JPEG、PNG、WebP
+- [ ] `/tdd-e2e-red` — S-1-5 拒絕相簿巢狀並維持單層:
+  - 實作計畫：
+    - 主頁不提供「把相簿拖進另一相簿」的有效投放目標
+    - 無在相簿下建立子相簿的操作入口（GR-001）
+- [ ] `/tdd-e2e-red` — 執行本 User Story 的測試，確認本 US 的 TDD E2E Red 測試皆已實作且皆為紅燈
+
+#### Green
+
+- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+  - 實作計畫：
+    - `api.js`＋主頁：建立相簿表單／Modal，呼叫 `POST /albums`，成功導向詳情（帶 id／name）
+    - 相簿詳情：檔案選取器多檔上傳 → `POST .../photos`；平鋪區追加結果
+    - 「移至其他相簿」→ `PATCH /photos/:id`，成功後從目前平鋪移除
+    - 錯誤態：415／驗證錯誤顯示於 UI；結構上禁止巢狀操作
+
+
+
+#### Refactor
+
+- [ ] `/tdd-e2e-refactor` — 行為不變下整理 api／render／事件綁定
+
+---
+
+
+
+### US-2 在主頁面依日期瀏覽相簿（優先級：P2）
+
+
+
+#### AC / Edge
+
+- AC-2-1 假設使用者已在不同日期建立多個相簿，當使用者進入主頁面，則系統應依各相簿的建立日期將相簿分組顯示
+- Edge-2-1 當某個日期分組下沒有任何相簿時，系統不應顯示空白日期分組
+
+
+
+#### Red
+
+- [ ] `/tdd-e2e-red` — S-2-1 主頁依相簿建立日期分組顯示:
+  - 實作計畫：
+    - 載入主頁呼叫（或 Mock）`GET /albums`
+    - 依 `groups[].group_date` 渲染日期標題與相簿列（name／photo_count）
+- [ ] `/tdd-e2e-red` — S-2-2 沒有相簿的日期不顯示空白分組:
+  - 實作計畫：
+    - 不渲染 `albums` 為空的分組標題
+    - 無相簿時顯示「可建立第一個相簿」類空狀態（ui-plan）
+- [ ] `/tdd-e2e-red` — 執行本 User Story 的測試，確認本 US 的 TDD E2E Red 測試皆已實作且皆為紅燈
+
+#### Green
+
+- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+  - 實作計畫：
+    - `render.js`（或等效）依 `groups[]` 畫主頁；組內依回傳順序／`sort_order`
+    - 空列表與載入／錯誤提示對齊 ui-plan
+
+
+
+#### Refactor
+
+- [ ] `/tdd-e2e-refactor` — 行為不變下整理主頁分組渲染
+
+---
+
+
+
+### US-3 透過拖放重新排列相簿（優先級：P3）
+
+
+
+#### AC / Edge
+
+- AC-3-1 假設主頁面上已有多個相簿，當使用者將其中一個相簿拖放到新的位置，則系統應依新的順序顯示相簿
+- AC-3-2 假設使用者已完成一次相簿拖放排序，當使用者重新整理或再次進入主頁面，則系統應仍依先前保存的順序顯示相簿
+- Edge-3-1 當主頁面只有一個相簿時，拖放操作不應造成錯誤或混淆的互動結果
+
+
+
+#### Red
+
+- [ ] `/tdd-e2e-red` — S-3-1 拖放後主頁立即依新順序顯示相簿:
+  - 實作計畫：
+    - 同 `group_date` 內用原生 HTML Drag and Drop
+    - 放開後 DOM／畫面順序立即更新
+    - 發出 `PATCH /albums/reorder`（`group_date`＋該組全部 `album_ids`）；阻止跨分組投放
+- [ ] `/tdd-e2e-red` — S-3-2 拖放排序後重新整理或再進主頁仍保留順序:
+  - 實作計畫：
+    - 本層可用 Mock 餵已重排的 `GET /albums` 驗證重載呈現
+    - 真寫入持久化交 `task-integration.md`
+- [ ] `/tdd-e2e-red` — S-3-3 僅一個相簿時拖放不造成錯誤或混淆:
+  - 實作計畫：
+    - 單相簿分組內拖放不丟錯、不出現混亂 UI
+- [ ] `/tdd-e2e-red` — 執行本 User Story 的測試，確認本 US 的 TDD E2E Red 測試皆已實作且皆為紅燈
+
+#### Green
+
+- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+  - 實作計畫：
+    - `dnd.js`：同組內拖放、更新 DOM、組 `album_ids` 呼叫 reorder API
+    - 重載後依 `sort_order`／回傳順序渲染；單相簿邊界友善處理
+
+
+
+#### Refactor
+
+- [ ] `/tdd-e2e-refactor` — 行為不變下整理 dnd 與渲染職責
+
+---
+
+
+
+### US-4 在相簿內以平鋪方式預覽照片（優先級：P3）
+
+
+
+#### AC / Edge
+
+- AC-4-1 假設某個相簿內已有多張照片，當使用者打開該相簿，則系統應以平鋪式預覽顯示相簿中的照片
+- Edge-4-1 當相簿內尚無照片時，系統應顯示可理解的空狀態，而不是空白畫面
+
+
+
+#### Red
+
+- [ ] `/tdd-e2e-red` — S-4-1 打開含多張照片的相簿以平鋪預覽顯示:
+  - 實作計畫：
+    - 進入詳情呼叫 `GET /albums/:albumId/photos`
+    - 有資料時平鋪縮圖網格（優先 `thumbnail_url`，null 則降級 `original_url`）
+- [ ] `/tdd-e2e-red` — S-4-2 空相簿打開時顯示可理解的空狀態:
+  - 實作計畫：
+    - 空 `photos` 時顯示可上傳提示，而非空白死頁
+- [ ] `/tdd-e2e-red` — 執行本 User Story 的測試，確認本 US 的 TDD E2E Red 測試皆已實作且皆為紅燈
+
+#### Green
+
+- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+  - 實作計畫：
+    - 詳情頁載入列表＋平鋪／空狀態分支（ui-plan 業務邏輯 4）
+    - 標題 `name` 由導覽狀態帶入，不另開 GET 單筆相簿 API
+
+
+
+#### Refactor
+
+- [ ] `/tdd-e2e-refactor` — 行為不變下整理詳情頁渲染
+
+---
+
+
+
+## 4. 進度總覽
+
+
+| User Story | Scenario | Red | Green | Refactor |
+| ---------- | -------- | --- | ----- | -------- |
+| US-1       | S-1-1    | ⬜   | ⬜     | ⬜        |
+| US-1       | S-1-2    | ⬜   | ⬜     | ⬜        |
+| US-1       | S-1-3    | ⬜   | ⬜     | ⬜        |
+| US-1       | S-1-4    | ⬜   | ⬜     | ⬜        |
+| US-1       | S-1-5    | ⬜   | ⬜     | ⬜        |
+| US-2       | S-2-1    | ⬜   | ⬜     | ⬜        |
+| US-2       | S-2-2    | ⬜   | ⬜     | ⬜        |
+| US-3       | S-3-1    | ⬜   | ⬜     | ⬜        |
+| US-3       | S-3-2    | ⬜   | ⬜     | ⬜        |
+| US-3       | S-3-3    | ⬜   | ⬜     | ⬜        |
+| US-4       | S-4-1    | ⬜   | ⬜     | ⬜        |
+| US-4       | S-4-2    | ⬜   | ⬜     | ⬜        |
+
+
+---
+
+
+
+## 5. 假設
+
+- 本層可用 Mock 證明 UI；真串接持久化／跨相簿一致性見 `task-integration.md`
+

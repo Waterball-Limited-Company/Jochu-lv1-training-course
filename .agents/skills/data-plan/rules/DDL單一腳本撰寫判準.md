@@ -28,11 +28,11 @@ CREATE TABLE albums (...);
 ```
 ````
 
-# Rule 2 - DDL 必須實作可落庫的約束與設計脈絡結構項
+# Rule 2 - DDL 必須實作可落庫的約束與實體關聯結構項
 
 - Level: `MUST`
 - `CHECK`／`NOT NULL`／UNIQUE／必要 INDEX 應對齊 `data-plan.md` 約束清單中可落庫的欄位項。
-- `FOREIGN KEY`／級聯／「不提供某關聯欄位」應對齊本檔「設計脈絡」。
+- `FOREIGN KEY`／級聯／「不提供某關聯欄位」應對齊 `data-plan.md`「實體關聯設計」及其設計脈絡。
 - 不可只在文字寫「全域唯一」，DDL 卻沒有 UNIQUE／唯一索引。
 - 衍生不落庫的屬性不得出現在 `CREATE TABLE` 欄位中。
 
@@ -42,7 +42,7 @@ CREATE TABLE albums (...);
 
 ```md
 約束：name 非空白 → name TEXT NOT NULL CHECK (trim(name) <> '')
-設計脈絡：刪相簿級聯刪照片 → ON DELETE CASCADE
+實體關聯設計脈絡：刪相簿一併刪照片 → ON DELETE CASCADE
 ```
 
 ## Bad Example

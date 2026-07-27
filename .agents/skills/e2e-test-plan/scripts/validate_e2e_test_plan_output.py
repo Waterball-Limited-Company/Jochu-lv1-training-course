@@ -12,13 +12,15 @@ from pathlib import Path
 
 PLACEHOLDER_RE = re.compile(r"\{\{[A-Z0-9_]+\}\}")
 TITLE_RE = re.compile(r"^# 端對端測試計畫：.+$")
-SCENARIO_HEADING_RE = re.compile(r"^### Scenario:\s+(S-\d+-\d+)\s+.+$")
-US_HEADING_RE = re.compile(r"^## US-\d+\s+.+\（優先級：P\d+\）\s*$")
+PROOF_BLOCK_RE = re.compile(r"^## (後端|前端|整合)\s*$")
+US_HEADING_RE = re.compile(r"^### US-\d+\s+.+\（優先級：P\d+\）\s*$")
+SCENARIO_HEADING_RE = re.compile(r"^#### Scenario:\s+(S-\d+-\d+)\s+.+$")
+BLOCK_TAG_IN_SCENARIO_RE = re.compile(
+    r"^#### Scenario:\s+S-\d+-\d+\s*（(?:後端|前端|整合)）"
+)
 GHERKIN_FENCE_RE = re.compile(r"^```gherkin\s*$")
 API_PATH_RE = re.compile(r"\b(GET|POST|PUT|PATCH|DELETE)\s+/|`/[a-zA-Z0-9_{}/-]+`")
-MAPPING_CATEGORY_RE = re.compile(
-    r"^\s*-\s*\*\*(User Story|驗收標準|邊界條件|FR)\*\*:"
-)
+MAPPING_LABEL_RE = re.compile(r"^\s*-\s*\*\*(.+?)\*\*\s*$")
 
 REQUIRED_METADATA = [
     re.compile(r"^\*\*功能分支\*\*:\s*.+$"),
@@ -27,9 +29,19 @@ REQUIRED_METADATA = [
 ]
 
 REQUIRED_SECTIONS = [
-    "## 元素覆蓋總表",
+    "## 後端",
+    "## 前端",
+    "## 整合",
+    "## 未產出 Scenario 的邊界（blocked）",
+    "## 測試摘要總表",
     "## 假設",
 ]
+
+REQUIRED_MAPPING_BY_BLOCK = {
+    "後端": ("US", "AC / Edge", "FR", "API"),
+    "前端": ("US", "AC / Edge", "FR", "UI"),
+    "整合": ("US", "AC / Edge", "FR", "前端", "後端"),
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -94,13 +106,32 @@ def validate_gherkin_block(body: list[str], label: str) -> list[str]:
     return errors
 
 
+def current_proof_block(lines: list[str], index: int) -> str | None:
+    for i in range(index, -1, -1):
+        match = PROOF_BLOCK_RE.match(lines[i].strip())
+        if match:
+            return match.group(1)
+        if lines[i].startswith("## ") and not PROOF_BLOCK_RE.match(lines[i].strip()):
+            # left proof blocks (e.g. blocked / summary)
+            if lines[i].strip() in {
+                "## 未產出 Scenario 的邊界（blocked）",
+                "## 測試摘要總表",
+                "## 假設",
+            }:
+                return None
+    return None
+
+
 def validate_scenarios(lines: list[str]) -> list[str]:
     errors: list[str] = []
     scenario_indexes = [
-        idx for idx, line in enumerate(lines) if SCENARIO_HEADING_RE.match(line.strip())
+        idx
+        for idx, line in enumerate(lines)
+        if SCENARIO_HEADING_RE.match(line.strip())
+        or BLOCK_TAG_IN_SCENARIO_RE.match(line.strip())
     ]
     if not scenario_indexes:
-        errors.append("missing at least one `### Scenario: S-x-y …` heading")
+        errors.append("missing at least one `#### Scenario: S-x-y …` heading")
         return errors
 
     for position, start in enumerate(scenario_indexes):
@@ -111,53 +142,116 @@ def validate_scenarios(lines: list[str]) -> list[str]:
         )
         section = lines[start:end]
         heading = lines[start].strip()
+
+        if BLOCK_TAG_IN_SCENARIO_RE.match(heading):
+            errors.append(
+                f"{heading}: scenario title must not include （後端／前端／整合）"
+            )
+        elif not SCENARIO_HEADING_RE.match(heading):
+            errors.append(f"invalid scenario heading → `{heading}`")
+
+        block = current_proof_block(lines, start)
+        if block is None:
+            errors.append(f"{heading}: scenario must sit under ## 後端／前端／整合")
+            continue
+
         if not any(line.strip() == "**對應欄位**:" for line in section):
             errors.append(f"{heading}: missing `**對應欄位**:`")
-        for line in section:
-            if MAPPING_CATEGORY_RE.match(line):
+            continue
+
+        labels = [
+            match.group(1)
+            for line in section
+            if (match := MAPPING_LABEL_RE.match(line))
+        ]
+        required = REQUIRED_MAPPING_BY_BLOCK[block]
+        for label in required:
+            if label not in labels:
                 errors.append(
-                    f"{heading}: mapping must not use category labels "
-                    "(User Story / 驗收標準 / 邊界條件 / FR)"
+                    f"{heading}: under ## {block}, mapping missing `**{label}**`"
                 )
-                break
 
     return errors
 
 
-def validate_coverage_table(lines: list[str]) -> list[str]:
+def validate_us_headings(lines: list[str]) -> list[str]:
+    errors: list[str] = []
+    us_headings = [line for line in lines if line.startswith("### US-")]
+    if not us_headings:
+        errors.append("missing at least one `### US-…` heading under proof blocks")
+        return errors
+    for line in us_headings:
+        if not US_HEADING_RE.match(line.strip()):
+            errors.append(f"US heading must include 優先級：Pn → `{line.strip()}`")
+    return errors
+
+
+def validate_summary_table(lines: list[str]) -> list[str]:
     errors: list[str] = []
     start = next(
-        (idx for idx, line in enumerate(lines) if line.strip() == "## 元素覆蓋總表"),
+        (idx for idx, line in enumerate(lines) if line.strip() == "## 測試摘要總表"),
         None,
     )
     if start is None:
         return errors
 
+    if any(line.strip() == "## 元素覆蓋總表" for line in lines):
+        errors.append("must not include obsolete `## 元素覆蓋總表`")
+
     header_idx = next(
         (
             idx
-            for idx in range(start + 1, min(start + 20, len(lines)))
-            if "| ID |" in lines[idx] and "描述" in lines[idx] and "Scenario" in lines[idx]
+            for idx in range(start + 1, min(start + 30, len(lines)))
+            if line_has_summary_header(lines[idx])
         ),
         None,
     )
     if header_idx is None:
-        errors.append("元素覆蓋總表: missing `| ID | 描述 | Scenario |` header")
+        errors.append(
+            "測試摘要總表: missing header "
+            "`| User Story | AC / Edge | Scenario | 後端 | 前端 | 整合 |`"
+        )
         return errors
-
-    if "類型" in lines[header_idx]:
-        errors.append("元素覆蓋總表: must not include `類型` column")
 
     data_rows = 0
     for line in lines[header_idx + 1 :]:
         stripped = line.strip()
         if stripped.startswith("## "):
             break
-        if stripped.startswith("|") and not stripped.startswith("| ---") and "ID" not in stripped:
+        if (
+            stripped.startswith("|")
+            and not stripped.startswith("| ---")
+            and "User Story" not in stripped
+        ):
             data_rows += 1
+            cells = [c.strip() for c in stripped.strip("|").split("|")]
+            if len(cells) != 6:
+                errors.append(
+                    f"測試摘要總表: row must have 6 columns → `{stripped}`"
+                )
+                continue
+            for mark in cells[3:6]:
+                if mark not in {"✓", "—"}:
+                    errors.append(
+                        f"測試摘要總表: 落點欄只能是 ✓ 或 — → `{stripped}`"
+                    )
+                    break
     if data_rows < 1:
-        errors.append("元素覆蓋總表: must contain at least one data row")
+        errors.append("測試摘要總表: must contain at least one data row")
     return errors
+
+
+def line_has_summary_header(line: str) -> bool:
+    stripped = line.strip()
+    return (
+        stripped.startswith("|")
+        and "User Story" in stripped
+        and "AC / Edge" in stripped
+        and "Scenario" in stripped
+        and "後端" in stripped
+        and "前端" in stripped
+        and "整合" in stripped
+    )
 
 
 def validate_assumption_section(lines: list[str]) -> list[str]:
@@ -166,16 +260,31 @@ def validate_assumption_section(lines: list[str]) -> list[str]:
     if start is None:
         return ["missing `## 假設`"]
 
-    if start != max(idx for idx, line in enumerate(lines) if line.startswith("## ")):
+    top_level = [idx for idx, line in enumerate(lines) if line.startswith("## ")]
+    if start != max(top_level):
         errors.append("## 假設 must be the last top-level section")
 
     bullet_count = sum(
-        1
-        for line in lines[start + 1 :]
-        if line.strip().startswith("- ")
+        1 for line in lines[start + 1 :] if line.strip().startswith("- ")
     )
     if bullet_count < 1:
         errors.append("## 假設 must contain at least one `- ` bullet item")
+    return errors
+
+
+def validate_proof_block_order(lines: list[str]) -> list[str]:
+    errors: list[str] = []
+    positions = {
+        name: next(
+            (idx for idx, line in enumerate(lines) if line.strip() == f"## {name}"),
+            None,
+        )
+        for name in ("後端", "前端", "整合")
+    }
+    if any(pos is None for pos in positions.values()):
+        return errors
+    if not (positions["後端"] < positions["前端"] < positions["整合"]):
+        errors.append("proof blocks must appear in order: ## 後端 → ## 前端 → ## 整合")
     return errors
 
 
@@ -191,7 +300,7 @@ def validate(path: Path) -> list[str]:
         errors.append("missing top-level heading `# 端對端測試計畫：…`")
 
     for pattern in REQUIRED_METADATA:
-        if not any(pattern.match(line.strip()) for line in lines[:8]):
+        if not any(pattern.match(line.strip()) for line in lines[:12]):
             errors.append(f"missing metadata matching {pattern.pattern}")
 
     for section in REQUIRED_SECTIONS:
@@ -201,16 +310,10 @@ def validate(path: Path) -> list[str]:
     if PLACEHOLDER_RE.search(content):
         errors.append("output still contains unreplaced {{PLACEHOLDER}} tokens")
 
-    us_headings = [line for line in lines if line.startswith("## US-")]
-    if not us_headings:
-        errors.append("missing at least one `## US-…` section")
-    else:
-        for line in us_headings:
-            if not US_HEADING_RE.match(line.strip()):
-                errors.append(f"US heading must include 優先級：Pn → `{line.strip()}`")
-
+    errors.extend(validate_proof_block_order(lines))
+    errors.extend(validate_us_headings(lines))
     errors.extend(validate_scenarios(lines))
-    errors.extend(validate_coverage_table(lines))
+    errors.extend(validate_summary_table(lines))
     errors.extend(validate_assumption_section(lines))
 
     blocks = extract_gherkin_blocks(lines)

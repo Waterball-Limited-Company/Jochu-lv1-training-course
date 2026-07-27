@@ -1,81 +1,109 @@
-# Rule 1 - Scenario 的切分單位是 AC 或 Edge，不是 FR 或整個 US
+# Rule 1 - 每個可產出的 Scenario 必須對齊一條 AC 或一條可測 Edge
 
 - Level: `MUST`
 - 每個可產出的 Scenario 必須對齊一條驗收標準（AC）或一條可測邊界條件（Edge）。
-- User Story 只負責分章與優先級排序（標題需含「優先級：Pn」），不可把整包 US 壓成單一 Scenario。
-- FR 不可單獨長出 Scenario；FR 只出現在對應欄位與覆蓋總表。
+- 不可為了湊數量而發明 spec 沒有的行為例子；也不可把多條無關 AC 塞進同一則 Scenario。
+- 若同一則 Scenario 同時涵蓋語意重複的 AC 與全域 Edge（例如移動照片與禁止多重歸屬），允許在「AC / Edge」小標下列出多條，但業務 Scenario ID 仍只有一個。
 
 ## Good Example
 
-- 這個例子是好的，因為 US 下有多則 Scenario，各自對準 AC 或 Edge。
+- 這個例子是好的，因為一則 Scenario 清楚對到 AC，必要時可併列同源 Edge。
 
 ```md
-## US-1 …（優先級：P1）
-
-### Scenario: S-1-1 …
-### Scenario: S-1-2 …
-### Scenario: S-1-3 …
-```
-
-## Bad Example
-
-- 這個例子是壞的，因為以 FR 為單位開 Scenario。
-
-```md
-### Scenario: S-FR-001 建立相簿能力
-```
-
-# Rule 2 - 預設 1 AC→1 Scenario、1 可測 Edge→1 Scenario；語意重複則合併
-
-- Level: `MUST`
-- 每條 AC 預設產出一則 Scenario；每條不含 `[NEED CLARIFICATION]` 的 Edge 預設產出一則 Scenario。
-- 若某條 AC 與某條 Edge 的 When／Then 語意實質相同，必須合併為單一 Scenario，並在對應欄位同時列出該 AC 與 Edge。
-- Scenario 編號建議採 `S-<US序>-<該US內序>`，全檔唯一。
-
-## Good Example
-
-- 這個例子是好的，因為巢狀拒絕的 AC 與 Edge 合併為一則。
-
-```md
-### Scenario: S-1-2 拒絕相簿巢狀並維持單層
+#### Scenario: S-1-2 將已歸屬照片改加入另一相簿後只留在目標相簿
 
 **對應欄位**:
 
-- US-1 …
-- AC-1-2 …
-- Edge-1-1 …
+- **AC / Edge**
+  - AC-1-2 …
+  - Edge-G-2 …
 ```
 
 ## Bad Example
 
-- 這個例子是壞的，因為同一行為被拆成幾乎相同的兩則 Scenario。
+- 這個例子是壞的，因為一則 Scenario 混進多條無關驗收。
 
 ```md
-### Scenario: S-1-2 拒絕巢狀（AC）
-### Scenario: S-1-3 拒絕巢狀（Edge）
+#### Scenario: S-9-9 一次做完建立、拖放與平鋪
+
+**對應欄位**:
+
+- **AC / Edge**
+  - AC-1-1 …
+  - AC-3-1 …
+  - AC-4-1 …
 ```
 
-# Rule 3 - NEED CLARIFICATION 與依賴未澄清決策的 Edge 不產出 Scenario
+# Rule 2 - Scenario 編號與標題使用業務 ID，不加證明區塊括號
 
 - Level: `MUST`
-- 邊界條件若含 `[NEED CLARIFICATION: ...]`，本輪不可產出 Scenario，只能在 blocked 清單與覆蓋總表標 `blocked`。
-- 若某邊界雖無標記，但明確依賴另一條未澄清決策，同樣標 `blocked`，不自行腦補行為。
-- 使用者若先完成 `/clarify` 並回寫 `spec.md`，再依更新後的 AC／Edge 產出或更新 Scenario。
+- Scenario 標題格式為 `#### Scenario: S-<US>-<N> <業務標題>`。
+- 標題內不可加 `（後端）`／`（前端）`／`（整合）`；證明方式由所在的 `## 後端`／`## 前端`／`## 整合` 區塊區分。
+- 同一業務 ID 可出現在多個證明區塊（同一 AC／Edge 的多種證明實例）。
 
 ## Good Example
 
-- 這個例子是好的，因為未澄清邊界只列在 blocked，不寫假 GWT。
+- 這個例子是好的，因為業務 ID 乾淨，區塊標題承擔命名空間。
 
 ```md
-| Edge-1-3 | 同一張照片可否同時存在於多個相簿 | blocked |
+## 後端
+
+#### Scenario: S-1-1 建立「旅行」相簿並一次匯入多格式照片
 ```
 
 ## Bad Example
 
-- 這個例子是壞的，因為在未澄清時自行發明行為並寫成 Scenario。
+- 這個例子是壞的，因為把證明區塊寫進 Scenario 標題。
 
-```gherkin
-Scenario: 一張照片可同時屬於多個相簿
-  When 使用者把同一張照片加入兩個相簿
-  Then 兩個相簿都看得到該照片
+```md
+#### Scenario: S-1-1（後端）建立「旅行」相簿並一次匯入多格式照片
+```
+
+# Rule 3 - 未澄清的邊界標 blocked，不產出可執行 Scenario
+
+- Level: `MUST`
+- 含 `[NEED CLARIFICATION: …]` 或明確依賴未拍板決策的 Edge，本輪不寫可執行 Scenario，改在「未產出 Scenario 的邊界（blocked）」表列原因。
+- 不可自行腦補行為後當成已覆蓋。
+
+## Good Example
+
+- 這個例子是好的，因為未澄清項進入 blocked 表。
+
+```md
+## 未產出 Scenario 的邊界（blocked）
+
+| ID | 描述 | 阻塞原因 |
+| --- | --- | --- |
+| Edge-3-2 | … | [NEED CLARIFICATION: 日期分組與自訂順序共存規則未定] |
+```
+
+## Bad Example
+
+- 這個例子是壞的，因為未澄清仍寫成確定行為的 Scenario。
+
+```md
+#### Scenario: S-3-9 任意猜測跨組拖放後的順序
+```
+
+# Rule 4 - Edge ID 必須依 spec 條列順序穩定編號
+
+- Level: `MUST`
+- Edge ID 採 `Edge-<US序>-<該 US 邊界情境條列序>`；全域邊界採 `Edge-G-<全域邊界條列序>`。
+- 編號僅為追溯穩定，不可依寫作當下隨意跳號或重編已發布 ID。
+
+## Good Example
+
+- 這個例子是好的，因為對齊 US-1 第一條邊界與全域第二條邊界。
+
+```md
+- Edge-1-1 …（對應 US-1 邊界情境第 1 條）
+- Edge-G-2 …（對應全域邊界情境第 2 條）
+```
+
+## Bad Example
+
+- 這個例子是壞的，因為同一邊界每次編號不同。
+
+```md
+本輪寫 Edge-A、下輪改 Edge-99
 ```
