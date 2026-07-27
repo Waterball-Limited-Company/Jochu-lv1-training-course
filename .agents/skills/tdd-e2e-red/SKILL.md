@@ -1,12 +1,12 @@
 ---
 name: tdd-e2e-red
-description: 由 implement 在環境就緒後呼叫：依帶入的 layer、plan-package、單一 Scenario 與實作計畫，按需載入該 Scenario 的 e2e／SA 介面片段，寫入一支 E2E 測試（可含測試用 fixture／helper，不寫產品業務碼），跑全套測試並確認該新測為 Red，再回報給 implement。Use when implement invokes /tdd-e2e-red, or when executing a task-plan Red checkbox for one Scenario.
+description: 由 implement 在環境就緒後呼叫：依帶入的 layer、plan-package、單一 Scenario 與實作計畫，按需載入該 Scenario 的 e2e／SA 介面片段，寫入一支 E2E 測試（可含測試用 fixture／helper，不做讓 Scenario 通過的程式碼實作），跑全套測試並確認該新測為 Red，再回報給 implement。Use when implement invokes /tdd-e2e-red, or when executing a task-plan Red checkbox for one Scenario.
 disable-model-invocation: true
 ---
 
 # TDD E2E Red
 
-由 `/implement` 在環境 setup 完成後呼叫。針對**單一** Scenario：以帶入的實作計畫為索引載入必要 context，寫出完整 E2E 測試，執行該層全部測試，確認**本支新測**為 Red，並將結果交回 implement。不代勾 `task-*.md` checkbox，不實作產品業務行為（那是 `/tdd-e2e-green`）。
+由 `/implement` 在環境 setup 完成後呼叫。針對**單一** Scenario：以帶入的實作計畫為索引載入必要 context，寫出完整 E2E 測試，執行該層全部測試，確認**本支新測**為 Red，並將結果交回 implement。不代勾 `task-*.md` checkbox，不做讓 Scenario 通過的程式碼實作（那是 `/tdd-e2e-green`）。
 
 # SOP
 
@@ -34,7 +34,7 @@ disable-model-invocation: true
 1. READ 讀取該層專案用以定義測試腳本的檔案（如 `package.json` 的 `scripts`）。
 2. THINK 依本次已載入規則與已讀腳本，收斂全套測試指令；找不到可執行指令則停止並進入 Phase 5 回報。
 3. DELEGATE 執行該全套測試指令（含剛寫入的測試）。
-4. THINK 依本次已載入規則判定本支是否為合格業務 Red；若測試本身錯誤可先修正後重跑。通過則進入 Phase 5；無法證明 Red（含非預期綠或環境洞）則進入 Phase 5 回報。
+4. THINK 依本次已載入規則判定本支是否為合格 Red；若測試本身錯誤可先修正後重跑。通過則進入 Phase 5；無法證明 Red（含非預期綠或環境洞）則進入 Phase 5 回報。
 
 ## Phase 5 -- 回報 implement
 
