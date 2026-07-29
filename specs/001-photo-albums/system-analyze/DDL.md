@@ -3,7 +3,6 @@
 **功能分支**: `001-photo-albums`
 **建立日期**: 2026-07-22
 **狀態**: 草稿
-**對齊**: `system-analyze/data-plan.md`
 
 ## DDL
 
@@ -38,6 +37,8 @@ CREATE INDEX ix_photos_album_id_created
   ON photos (album_id, created_at);
 ```
 
+
+
 ## 假設
 
 - 第一版為單機個人應用，DDL 以本機 SQLite 語意撰寫
@@ -45,3 +46,4 @@ CREATE INDEX ix_photos_album_id_created
 - 建表順序固定為 `albums` → `photos`，以滿足外鍵依賴
 - `FOREIGN KEY`／級聯對齊 `data-plan.md`「實體關聯設計」；`CHECK`／必填／索引對齊 `data-plan.md` 約束清單中可落庫項；領域策略（如 `photo_count` 不落庫）不在本腳本建欄
 - 執行期需 `PRAGMA foreign_keys = ON`
+

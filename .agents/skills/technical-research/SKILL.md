@@ -12,9 +12,11 @@ disable-model-invocation: true
 
 ## Phase 1 -- 收斂輸入與輸出契約
 
-1. READ 讀取使用者需求、同 package 的 `spec.md`、既有 clarify 決策（若有）與 `templates/technical-research.example.md`，確認功能主題、US／FR／約束與技術選型線索。
-2. READ 讀取 `rules/輸出檔案定位判準.md`，確認 `technical-research.md` 與 `plan.md` 的目錄、檔名與標題 metadata。
-3. THINK 依本次已載入規則，收斂 `plan-package`、兩份產物路徑、標題 metadata 與預計涵蓋的技術面。
+1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」，以及專案根目錄 `constitution.md`（若存在）。
+2. THINK 依本次已載入之憲法讀取規則處理缺檔或套用約束：缺檔則警告後繼續；有檔則萃取與本 skill 相關之規範，後續步驟／產出與憲法衝突時以憲法為準。
+3. READ 讀取使用者需求、同 package 的 `spec.md`、既有 clarify 決策（若有）與 `templates/technical-research.example.md`，確認功能主題、US／FR／約束與技術選型線索。
+4. READ 讀取 `rules/輸出檔案定位判準.md`，確認 `technical-research.md` 與 `plan.md` 的目錄、檔名與標題 metadata。
+5. THINK 依本次已載入規則，收斂 `plan-package`、兩份產物路徑、標題 metadata 與預計涵蓋的技術面。
 
 ## Phase 2 -- 先處理高影響缺口
 

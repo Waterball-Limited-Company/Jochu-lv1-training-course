@@ -12,15 +12,17 @@ disable-model-invocation: true
 
 ## Phase 1 -- 解析 package 並確認本輪範圍
 
-1. READ 讀取使用者輸入與當前上下文，確認是否已帶 `plan-package` 或範圍選項。
-2. READ 讀取 `rules/進場package與範圍契約.md`，確認 package 解析與範圍選單規則。
-3. THINK 依本次已載入規則解析 `plan-package`；若零個可選 package，停止並進入 Phase 4 回報。
-4. READ 若需使用者從多個 package 中選擇，讀取 `templates/implement-package-round.md` 與 `templates/implement-package-round.example.md`。
-5. WRITE 若 package 尚未確定，依 package 骨架在對話中列出候選並等待回答；未回答前停止。
-6. THINK 依回答或既有結果鎖定 `plan-package`。
-7. READ 讀取 `templates/implement-scope-round.md` 與 `templates/implement-scope-round.example.md`。
-8. WRITE 若範圍／順序尚未拍板，依範圍骨架輸出進場選單並等待回答；未回答前停止。
-9. THINK 依本次已載入規則與回答收斂本輪層別序列與對應 `task-*.md` 路徑；若不通過，停止並進入 Phase 4 回報。
+1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」，以及專案根目錄 `constitution.md`（若存在）。
+2. THINK 依本次已載入之憲法讀取規則處理缺檔或套用約束：缺檔則警告後繼續；有檔則萃取與本 skill 相關之規範，後續步驟／產出與憲法衝突時以憲法為準。
+3. READ 讀取使用者輸入與當前上下文，確認是否已帶 `plan-package` 或範圍選項。
+4. READ 讀取 `rules/進場package與範圍契約.md`，確認 package 解析與範圍選單規則。
+5. THINK 依本次已載入規則解析 `plan-package`；若零個可選 package，停止並進入 Phase 4 回報。
+6. READ 若需使用者從多個 package 中選擇，讀取 `templates/implement-package-round.md` 與 `templates/implement-package-round.example.md`。
+7. WRITE 若 package 尚未確定，依 package 骨架在對話中列出候選並等待回答；未回答前停止。
+8. THINK 依回答或既有結果鎖定 `plan-package`。
+9. READ 讀取 `templates/implement-scope-round.md` 與 `templates/implement-scope-round.example.md`。
+10. WRITE 若範圍／順序尚未拍板，依範圍骨架輸出進場選單並等待回答；未回答前停止。
+11. THINK 依本次已載入規則與回答收斂本輪層別序列與對應 `task-*.md` 路徑；若不通過，停止並進入 Phase 4 回報。
 
 ## Phase 2 -- 依層執行 task 步驟
 

@@ -12,10 +12,12 @@ disable-model-invocation: true
 
 ## Phase 1 -- 收斂輸入與輸出契約
 
-1. READ 讀取使用者需求、同 package 的 `spec.md`（含 `## 關鍵實體` 若有）、`system-analyze/technical-research.md`、既有 clarify 決策（若有）與 `templates/data-plan.example.md`，確認功能主題、US／FR／邊界、關鍵實體種子、技術選型與持久化線索。
-2. THINK 若 `technical-research.md` 不存在，停止後續步驟，先請使用者完成 `/technical-research` 或經 `/system-analyze` 主鏈產出。
-3. READ 讀取 `rules/輸出檔案定位判準.md`，確認 `data-plan.md`／按需 `DDL.md` 的路徑、檔名、標題 metadata，以及何時必須產出 `DDL.md`。
-4. THINK 依本次已載入規則，收斂 `plan-package`、目標路徑、標題 metadata，以及本次是否需要 `DDL.md`（任何 DB 持久化讀寫＝需要）。
+1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」，以及專案根目錄 `constitution.md`（若存在）。
+2. THINK 依本次已載入之憲法讀取規則處理缺檔或套用約束：缺檔則警告後繼續；有檔則萃取與本 skill 相關之規範，後續步驟／產出與憲法衝突時以憲法為準。
+3. READ 讀取使用者需求、同 package 的 `spec.md`（含 `## 關鍵實體` 若有）、`system-analyze/technical-research.md`、既有 clarify 決策（若有）與 `templates/data-plan.example.md`，確認功能主題、US／FR／邊界、關鍵實體種子、技術選型與持久化線索。
+4. THINK 若 `technical-research.md` 不存在，停止後續步驟，先請使用者完成 `/technical-research` 或經 `/system-analyze` 主鏈產出。
+5. READ 讀取 `rules/輸出檔案定位判準.md`，確認 `data-plan.md`／按需 `DDL.md` 的路徑、檔名、標題 metadata，以及何時必須產出 `DDL.md`。
+6. THINK 依本次已載入規則，收斂 `plan-package`、目標路徑、標題 metadata，以及本次是否需要 `DDL.md`（任何 DB 持久化讀寫＝需要）。
 
 ## Phase 2 -- 先處理高影響缺口
 
