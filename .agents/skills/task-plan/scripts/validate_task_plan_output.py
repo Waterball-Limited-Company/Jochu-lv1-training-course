@@ -140,10 +140,15 @@ def validate_task_file(path: Path, layer: str, expected_ids: list[str]) -> list[
                     )
                 else:
                     verify_body = red[last.end() :]
-                    if "實作計畫：" in verify_body or "實作計畫:" in verify_body:
+                    if (
+                        "受測行為：" in verify_body
+                        or "受測行為:" in verify_body
+                        or "實作計畫：" in verify_body
+                        or "實作計畫:" in verify_body
+                    ):
                         errors.append(
                             f"{path.name}: {match.group(1)} Red verify item "
-                            "must not nest 實作計畫"
+                            "must not nest 受測行為／實作計畫"
                         )
                 for j, item in enumerate(red_item_matches[:-1]):
                     chunk_end = (
@@ -157,10 +162,10 @@ def validate_task_file(path: Path, layer: str, expected_ids: list[str]) -> list[
                             f"{path.name}: {match.group(1)} non-final Red item "
                             "must be Scenario S-n-m"
                         )
-                    if "實作計畫：" not in chunk and "實作計畫:" not in chunk:
+                    if "受測行為：" not in chunk and "受測行為:" not in chunk:
                         errors.append(
                             f"{path.name}: {match.group(1)} a Scenario Red item "
-                            "lacks nested 實作計畫"
+                            "lacks nested 受測行為"
                         )
 
     actual_ids = SCENARIO_RED_ITEM_RE.findall(text)

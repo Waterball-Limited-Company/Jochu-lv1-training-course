@@ -6,7 +6,7 @@
   - `backend`：`api-plan.md`、`DDL.md`、`data-plan.md`
   - `frontend`：`ui-plan.md`、`data-plan.md`；寫 Mock 時另加 `api-plan.md`
   - `integration`：`ui-plan.md`、`api-plan.md`、`data-plan.md`（不含 `DDL.md`）
-- 不得載入：`technical-research.md`、`spec.md`、`plan.md`、整份 `task-*.md`（實作計畫已由 prompt 帶入）。
+- 不得載入：`technical-research.md`、`spec.md`、`plan.md`、整份 `task-*.md`（受測行為已由 prompt 帶入）。
 
 ## Good Example
 
@@ -27,10 +27,10 @@ layer=backend, plan-package=001-photo-albums, S-1-1
 每次 Red 先讀完 spec.md + technical-research.md + 整份 api-plan.md
 ```
 
-# Rule 2 - 只讀實作計畫點名的介面元素，需要再補相關契約
+# Rule 2 - 只讀受測行為點名的介面元素，需要再補相關契約
 
 - Level: `MUST`
-- 對 SA 檔不得整檔通讀；只讀實作計畫（與 e2e 對應欄位）點名到的 endpoint、頁面、實體或其他介面元素。
+- 對 SA 檔不得整檔通讀；只讀受測行為（與 e2e 對應欄位）點名到的 endpoint、頁面、實體或其他介面元素。
 - 寫測時若斷言仍缺形狀／欄位／狀態碼等細節，可再手術式補讀**相關**契約片段；不可借機通讀無關章節。
 
 ## Good Example
@@ -38,7 +38,7 @@ layer=backend, plan-package=001-photo-albums, S-1-1
 - 這個例子是好的，因為先讀點名 endpoint，缺 response 形狀再補該 endpoint 章節。
 
 ```text
-實作計畫點名 PATCH /photos/:id
+受測行為點名 PATCH /photos/:id 與期望 album_id
 → 只開 api-plan 該 endpoint
 → 需要 body 範例時再讀同一 endpoint 的請求／回應區塊
 ```
@@ -51,28 +51,28 @@ layer=backend, plan-package=001-photo-albums, S-1-1
 點名一個 endpoint，卻把 api-plan 全檔載入
 ```
 
-# Rule 3 - 行為以 Gherkin 為準，實作計畫負責落點
+# Rule 3 - 行為以 Gherkin 為準，受測行為指定要驗證的期望
 
 - Level: `MUST`
 - 測試的 Given／When／Then 行為必須對齊該 Scenario 的 Gherkin。
-- 實作計畫只導航如何打 API／操作 UI／使用 Mock 等落點，不得覆蓋或改寫 Gherkin 的驗收語意。
+- 受測行為只指定「要驗證什麼／期望什麼」，不指定測試手段；不得覆蓋或改寫 Gherkin 的驗收語意。
 - 若兩者明顯矛盾，必須停止並回報 implement，不可默默選邊繼續寫測。
 
 ## Good Example
 
-- 這個例子是好的，因為 Then 跟 Gherkin，路徑跟實作計畫。
+- 這個例子是好的，因為 Then 跟 Gherkin，期望跟受測行為。
 
 ```text
 Gherkin Then：照片只在相簿 B
-實作計畫：PATCH 後分別 GET A／B 的 photos
-→ 斷言對齊 Then；呼叫方式對齊實作計畫
+受測行為：移至 B 後，A 詳情不再顯示、B 可見該照片
+→ 斷言對齊 Then 與受測行為期望
 ```
 
 ## Bad Example
 
-- 這個例子是壞的，因為實作計畫少寫一步就省略 Gherkin 的關鍵 Then。
+- 這個例子是壞的，因為受測行為少寫一步就省略 Gherkin 的關鍵 Then。
 
 ```text
-Gherkin 要求「不再出現在 A」，實作計畫只寫 PATCH 200
-→ 測試只 assert 200，不管 A 是否仍有該照片
+Gherkin 要求「不再出現在 A」，受測行為只寫「移動成功」
+→ 測試只 assert 成功，不管 A 是否仍有該照片
 ```

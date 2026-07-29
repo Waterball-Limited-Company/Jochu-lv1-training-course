@@ -1,12 +1,12 @@
 ---
 name: tdd-e2e-green
-description: 由 implement 呼叫：依 layer、plan-package、單一 User Story 與 Green 實作計畫，載入本 US 既有 Red 測與點名 SA／程式片段，以仍紅 Scenario 為目標做程式碼實作；每步跑該層全套測試推進變綠（允許多支同綠），直到本 US 全綠後回報。Use when implement invokes /tdd-e2e-green, or when executing a task-plan Green checkbox for one User Story.
+description: 由 implement 呼叫：依 layer、plan-package、單一 User Story 與 Green 實作計畫，載入本 US 既有 Red 測與點名 SA／程式片段，以仍紅 Scenario 為目標做 just enough 程式碼實作；每步跑該層全套測試推進變綠（允許多支同綠），直到本 US 全綠後回報。Use when implement invokes /tdd-e2e-green, or when executing a task-plan Green checkbox for one User Story.
 disable-model-invocation: true
 ---
 
 # TDD E2E Green
 
-由 `/implement` 呼叫。一次針對**一個 User Story**：依 Green 實作計畫做程式碼實作，內部以「仍紅的 Scenario」推進；每步執行該層全部測試，確認目標變綠且不弄紅本層先前已綠的測；允許一次實作讓多支變綠。本 US 相關測皆綠後回報 implement。不代勾 `task-*.md` checkbox。
+由 `/implement` 呼叫。一次針對**一個 User Story**：依 Green 實作計畫做 just enough 程式碼實作，內部以「仍紅的 Scenario」推進；每步執行該層全部測試，確認目標變綠且不弄紅本層先前已綠的測；允許一次實作讓多支變綠。本 US 相關測皆綠後回報 implement。不代勾 `task-*.md` checkbox。
 
 # SOP
 

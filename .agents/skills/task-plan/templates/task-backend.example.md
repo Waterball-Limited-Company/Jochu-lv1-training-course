@@ -113,29 +113,29 @@ npm test
 #### Red
 
 - [ ] `/tdd-e2e-red` — S-1-1 建立「旅行」相簿並一次匯入多格式照片:
-  - 實作計畫：
-    - 以 `supertest` 打 Express app，路徑前綴 `/api`
-    - 串 `POST /albums`（201）→ `POST /albums/:albumId/photos` multipart 多檔 JPEG／PNG／WebP（201）
-    - 再以 `GET /albums` 可見該相簿、`GET /albums/:albumId/photos` 含剛上傳照片
-    - 契約形狀對齊 api-plan；DB 依 DDL `albums`→`photos`；影像用測試 fixture
+  - 受測行為：
+    - `POST /api/albums` 建立名為「旅行」的相簿 → 預期 201，回傳含該相簿
+    - 對該相簿 `POST /api/albums/:albumId/photos` 一次上傳多檔 JPEG／PNG／WebP → 預期 201
+    - `GET /api/albums` 可見「旅行」相簿；`GET /api/albums/:albumId/photos` 含剛上傳的照片
+    - 回應形狀對齊 api-plan（狀態碼為斷言重點）
 - [ ] `/tdd-e2e-red` — S-1-2 將已歸屬照片改加入另一相簿後只留在目標相簿:
-  - 實作計畫：
-    - 先建相簿 A／B，並把照片掛在 A
-    - `PATCH /photos/:id` body `{ album_id: B }`，預期 200 且回傳 `album_id` 為 B
-    - 分別 `GET` A／B 的 photos：只在 B、不在 A（覆寫歸屬、不留多重）
+  - 受測行為：
+    - 前置：已有相簿 A／B，且某照片歸屬 A
+    - `PATCH /api/photos/:id` body `{ album_id: B }` → 預期 200，回傳 `album_id` 為 B
+    - `GET` A 的 photos 不含該照片；`GET` B 的 photos 含該照片（覆寫歸屬、不留多重）
 - [ ] `/tdd-e2e-red` — S-1-3 空相簿尚未加入照片時仍應顯示:
-  - 實作計畫：
-    - `POST /albums` 建空相簿（不先上傳）
-    - `GET /albums` 列表仍含該相簿（`photo_count` 可為 0）
+  - 受測行為：
+    - `POST /api/albums` 建立空相簿（未上傳任何照片）→ 預期成功
+    - `GET /api/albums` 列表仍含該相簿（`photo_count` 可為 0）
 - [ ] `/tdd-e2e-red` — S-1-4 選取不支援格式時拒絕匯入並說明支援範圍:
-  - 實作計畫：
-    - 對已存在相簿 `POST .../photos` 夾不支援檔（如 HEIC fixture）
-    - 預期 415（或 api-plan 等價）；`error.message`／`details` 說明僅支援 JPEG、PNG、WebP
+  - 受測行為：
+    - 對已存在相簿 `POST .../photos` 夾不支援格式檔 → 預期 415（或 api-plan 等價）
+    - 錯誤回應的 `error.message`／`details` 說明僅支援 JPEG、PNG、WebP
     - 整批拒絕，不部分成功
 - [ ] `/tdd-e2e-red` — S-1-5 拒絕相簿巢狀並維持單層:
-  - 實作計畫：
-    - `POST /albums` 不接受 `parent_album_id` 等巢狀欄位（多餘欄位忽略或 400，以契約為準）
-    - `GET /albums` 回傳扁平 `groups[].albums[]`，無子相簿結構
+  - 受測行為：
+    - `POST /api/albums` 帶 `parent_album_id` 等巢狀欄位 → 依契約忽略或 400
+    - `GET /api/albums` 回傳扁平 `groups[].albums[]`，無子相簿結構
 - [ ] `/tdd-e2e-red` — 執行本 User Story 的測試，確認本 US 的 TDD E2E Red 測試皆已實作且皆為紅燈
 
 #### Green
@@ -172,12 +172,12 @@ npm test
 #### Red
 
 - [ ] `/tdd-e2e-red` — S-2-1 主頁依相簿建立日期分組顯示:
-  - 實作計畫：
-    - 種子多筆不同 `created_at` 日期的 albums
-    - `GET /albums` 200；`groups[]` 依 `group_date`（由 `DATE(created_at)` 衍生）分組，組內有對應 albums
+  - 受測行為：
+    - 資料中有多筆不同 `created_at` 日期的 albums
+    - `GET /api/albums` → 預期 200；`groups[]` 依 `group_date`（由 `DATE(created_at)` 衍生）分組，組內有對應 albums
 - [ ] `/tdd-e2e-red` — S-2-2 沒有相簿的日期不顯示空白分組:
-  - 實作計畫：
-    - 同一資料下斷言 `groups` 不得出現 `albums` 為空的日期分組
+  - 受測行為：
+    - 同一資料下，`groups` 不得出現 `albums` 為空的日期分組
     - 無相簿時可回空 `groups`
 - [ ] `/tdd-e2e-red` — 執行本 User Story 的測試，確認本 US 的 TDD E2E Red 測試皆已實作且皆為紅燈
 
@@ -211,10 +211,10 @@ npm test
 #### Red
 
 - [ ] `/tdd-e2e-red` — S-3-2 拖放排序後重新整理或再進主頁仍保留順序:
-  - 實作計畫：
-    - 同 `group_date` 下準備多本相簿
-    - `PATCH /albums/reorder`：body 含 `group_date`＋該組全部 `album_ids` 新順序，預期 200
-    - 再 `GET /albums`：組內 `sort_order`／順序與重排一致（持久化在 DB `albums.sort_order`）
+  - 受測行為：
+    - 同 `group_date` 下有多本相簿
+    - `PATCH /api/albums/reorder`：body 含 `group_date`＋該組全部 `album_ids` 新順序 → 預期 200
+    - 再 `GET /api/albums`：組內順序與重排一致（持久化）
 - [ ] `/tdd-e2e-red` — 執行本 User Story 的測試，確認本 US 的 TDD E2E Red 測試皆已實作且皆為紅燈
 
 #### Green
@@ -248,13 +248,13 @@ npm test
 #### Red
 
 - [ ] `/tdd-e2e-red` — S-4-1 打開含多張照片的相簿以平鋪預覽顯示:
-  - 實作計畫：
-    - `GET /albums/:albumId/photos` 預期 200
+  - 受測行為：
+    - `GET /api/albums/:albumId/photos` → 預期 200
     - `photos[]` 多筆且含 `thumbnail_url`／`original_url`（對齊 api-plan）
     - 排序依 `created_at` 升冪
 - [ ] `/tdd-e2e-red` — S-4-2 空相簿打開時顯示可理解的空狀態:
-  - 實作計畫：
-    - 同一 endpoint 對空相簿回 200＋空 `photos` 陣列
+  - 受測行為：
+    - 同一 endpoint 對空相簿 → 預期 200＋空 `photos` 陣列
     - 空狀態文案由前端；後端只保證空集合契約
 - [ ] `/tdd-e2e-red` — 執行本 User Story 的測試，確認本 US 的 TDD E2E Red 測試皆已實作且皆為紅燈
 

@@ -69,10 +69,9 @@ ls backend/package.json frontend/package.json frontend/vite.config.js
 #### Red
 
 - [ ] `/tdd-e2e-red` — S-1-2 將已歸屬照片改加入另一相簿後只留在目標相簿（真串接）:
-  - 實作計畫：
-    - UI 在相簿詳情執行「移至其他相簿」→ 真打 `PATCH /photos/:id`
-    - 再分別打開 A／B 詳情（真 `GET .../photos`）斷言只在 B、不在 A
-    - 不得以前端 Mock 充數
+  - 受測行為：
+    - 在相簿 A 詳情將照片移至相簿 B 後，A 詳情不再顯示該照片、B 詳情可見該照片
+    - 前後端同時啟動下，重開 A／B 詳情結果仍一致（歸屬覆寫、不留多重）
 - [ ] `/tdd-e2e-red` — 執行本 User Story 的測試，確認本 US 的 TDD E2E Red 測試皆已實作且皆為紅燈
 
 #### Green
@@ -105,9 +104,9 @@ ls backend/package.json frontend/package.json frontend/vite.config.js
 #### Red
 
 - [ ] `/tdd-e2e-red` — S-3-2 拖放排序後重新整理或再進主頁仍保留順序（真串接）:
-  - 實作計畫：
-    - 主頁同組拖放 → 真 `PATCH /albums/reorder` 寫入
-    - 重整或再進主頁 → 真 `GET /albums` 組內順序與畫面一致
+  - 受測行為：
+    - 主頁同一日期分組拖放相簿後，重整或再進主頁，組內順序仍與拖放結果一致
+    - 前後端同時啟動下，畫面順序與後端持久化結果一致
 - [ ] `/tdd-e2e-red` — 執行本 User Story 的測試，確認本 US 的 TDD E2E Red 測試皆已實作且皆為紅燈
 
 #### Green
