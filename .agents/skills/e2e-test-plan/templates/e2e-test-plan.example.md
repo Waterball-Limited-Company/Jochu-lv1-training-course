@@ -64,6 +64,9 @@ Scenario: 將已歸屬照片改加入另一相簿後只留在目標相簿
 - **API**
   - `PATCH /photos/:id` 覆寫目標 `album_id`（移動）
   - `GET /albums/:albumId/photos` 分別對相簿 A、B 斷言歸屬（只在 B、不在 A）
+- **Data**
+  - data-plan：同一照片同一時間只屬於一個相簿（移動覆寫歸屬）
+  - DDL：`photos.album_id` 單外鍵語意（非多對多），移動後舊相簿列表不再含該列
 
 ---
 
@@ -725,7 +728,7 @@ Scenario: 拖放排序後重新整理或再進主頁仍保留順序
 
 ## 假設
 
-- 本計畫依同 package 的 `spec.md` 展開 Scenario，並對齊 `system-analyze/api-plan.md`、`system-analyze/ui-plan.md`；GWT 仍使用領域語言，endpoint／頁面細節只寫在對應欄位。
+- 本計畫依同 package 的 `spec.md` 展開 Scenario，並對齊 `system-analyze/api-plan.md`、`system-analyze/ui-plan.md`；若存在亦對齊 `data-plan.md`／`DDL.md` 可測持久化約束。GWT 仍使用領域語言，endpoint／頁面／資料約束細節只寫在對應欄位（含可選 **Data**）。
 - 證明區塊：`## 後端`（API → Response／DB）、`## 前端`（瀏覽器 UI，後端可 Mock）、`## 整合`（前後端真串接）；Scenario 標題僅用業務 ID（如 `S-1-1`），證明方式由所在 `##` 區塊區分。
 - 落點：AC／Edge 前後端都碰得到則後端＋前端都寫；整合僅當 Then 必須真串接才有意義（本輪為 S-1-2、S-3-2）。
 - 檔末「測試摘要總表」以一列一條 AC／Edge 標示落點；FR 只留在各 Scenario 對應欄位。

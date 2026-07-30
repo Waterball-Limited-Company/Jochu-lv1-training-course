@@ -1,16 +1,16 @@
 ---
 name: implement
-description: 依 specs/<plan-package>/task-plan/ 的 task 逐步實作：進場解析 package 並以選單確認範圍／順序；§1／§2 等無 skill 引用步驟親自執行；§3 的 /tdd-e2e-red|green|refactor 委派並組裝參數；逐步勾選 checkbox；失敗即停並回報。Use when the user invokes /implement, asks to execute task-plan implementation, or continue from unchecked task items.
+description: 依 specs/<plan-package>/task-plan/ 的 task 逐步實作：進場解析 package；若有 analyze-report.md 則讀取，嚴重項硬停確認後才進入範圍選單；§1／§2 親自執行；§3 的 /tdd-e2e-red|green|refactor 委派；逐步勾選 checkbox；失敗即停並回報。Use when the user invokes /implement, asks to execute task-plan implementation, or continue from unchecked task items.
 disable-model-invocation: true
 ---
 
 # Implement
 
-執行 `task-plan` 產物的逐步實作編排器：解析 `plan-package`、確認本輪層別範圍與順序後，依對應 `task-*.md` 從第一個未勾項往下做。無 skill 引用的步驟親自落地；標有 `/tdd-e2e-red`／`/tdd-e2e-green`／`/tdd-e2e-refactor` 的步驟委派並傳入契約參數。成功則勾選進度；失敗則停止並回報，保留已勾項。
+執行 `task-plan` 產物的逐步實作編排器：解析 `plan-package`；若有 `analyze-report.md` 則讀取，有嚴重發現則硬停確認；再確認本輪層別範圍與順序後，依對應 `task-*.md` 從第一個未勾項往下做。無 skill 引用的步驟親自落地；標有 `/tdd-e2e-red`／`/tdd-e2e-green`／`/tdd-e2e-refactor` 的步驟委派並傳入契約參數。成功則勾選進度；失敗則停止並回報，保留已勾項。
 
 # SOP
 
-## Phase 1 -- 解析 package 並確認本輪範圍
+## Phase 1 -- 解析 package、analyze 閘門並確認本輪範圍
 
 1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」，以及專案根目錄 `constitution.md`（若存在）。
 2. THINK 依本次已載入之憲法讀取規則處理缺檔或套用約束：缺檔則警告後繼續；有檔則萃取與本 skill 相關之規範，後續步驟／產出與憲法衝突時以憲法為準。
@@ -20,9 +20,12 @@ disable-model-invocation: true
 6. READ 若需使用者從多個 package 中選擇，讀取 `templates/implement-package-round.md` 與 `templates/implement-package-round.example.md`。
 7. WRITE 若 package 尚未確定，依 package 骨架在對話中列出候選並等待回答；未回答前停止。
 8. THINK 依回答或既有結果鎖定 `plan-package`。
-9. READ 讀取 `templates/implement-scope-round.md` 與 `templates/implement-scope-round.example.md`。
-10. WRITE 若範圍／順序尚未拍板，依範圍骨架輸出進場選單並等待回答；未回答前停止。
-11. THINK 依本次已載入規則與回答收斂本輪層別序列與對應 `task-*.md` 路徑；若不通過，停止並進入 Phase 4 回報。
+9. READ 讀取 `rules/analyze報告進場閘門判準.md`；若存在 `specs/<plan-package>/analyze-report.md` 則 READ 該報告。
+10. THINK 依已載入閘門規則判定是否有嚴重發現；無報告則依規則警告後繼續。
+11. WRITE 若有嚴重發現：在對話硬停摘要嚴重項並詢問「先修」或「仍要繼續實作」；未獲明示繼續前停止，不進入範圍選單。
+12. READ 讀取 `templates/implement-scope-round.md` 與 `templates/implement-scope-round.example.md`。
+13. WRITE 若範圍／順序尚未拍板，依範圍骨架輸出進場選單並等待回答；未回答前停止。
+14. THINK 依本次已載入規則與回答收斂本輪層別序列與對應 `task-*.md` 路徑；若不通過，停止並進入 Phase 4 回報。
 
 ## Phase 2 -- 依層執行 task 步驟
 

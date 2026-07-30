@@ -4,6 +4,7 @@
 
 **Context**  
 已鎖定功能目錄：`001-photo-albums`（掃描 `specs/*/task-plan/` 後唯一命中）。  
+若存在 `analyze-report.md`，進場閘門已處理（無嚴重或你已明示仍要繼續）。  
 `/implement` 會依你選的範圍，讀取對應 `task-*.md`，從第一個未勾選步驟繼續；§1／§2 親自做，§3 的 TDD skill 會委派執行。
 
 **總結之提問**  
