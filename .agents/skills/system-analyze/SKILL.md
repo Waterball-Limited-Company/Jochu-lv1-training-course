@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 ## Phase 1 -- 收斂 package 與輸出目錄
 
-1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」，以及專案根目錄 `constitution.md`（若存在）。
+1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」，並依其讀取 `.constitution/core.md` 與本 skill 對應憲法（若存在）。
 2. THINK 依本次已載入之憲法讀取規則處理缺檔或套用約束：缺檔則警告後繼續；有檔則萃取與本 skill 相關之規範，後續步驟／產出與憲法衝突時以憲法為準。
 3. READ 讀取 `rules/同層skill委派判準.md`，確認下游 skill 必須從 `.agents/skills/` 同層 sibling 載入，不得從 `system-analyze/` 子目錄載入。
 4. READ 讀取使用者需求與同 package 的 `spec.md`（及既有 clarify 決策，若有），確認功能主題與 `plan-package`。

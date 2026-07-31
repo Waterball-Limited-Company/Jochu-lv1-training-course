@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 ## Phase 1 -- 收斂輸入與生成邊界
 
-1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」，以及專案根目錄 `constitution.md`（若存在）。
+1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」，並依其讀取 `.constitution/core.md` 與本 skill 對應憲法（若存在）。
 2. THINK 依本次已載入之憲法讀取規則處理缺檔或套用約束：缺檔則警告後繼續；有檔則萃取與本 skill 相關之規範，後續步驟／產出與憲法衝突時以憲法為準。
 3. READ 讀取使用者需求、`NNN-plan-package` 與 `templates/spec.template.md`、`templates/spec.example.md`，確認本次要產出的 spec 結構、benchmark 風格、package 邊界，以及固定產物路徑 `/specs/<NNN-plan-package>/spec-mapping-checklist.md` 與 `/specs/<NNN-plan-package>/spec.md`。
 4. THINK 先根據已讀內容判斷本次輸入是否已足夠切分故事、約束與成功標準；若仍有會改變故事邊界、全域規則歸屬或待澄清標記的高影響缺口，準備進入澄清。
