@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Implement
 
-執行 `task-plan` 產物的逐步實作編排器：解析 `plan-package`；若有 `analyze-report.md` 則讀取，有嚴重發現則硬停確認；再確認本輪層別範圍與順序後，依對應 `task-*.md` 從第一個未勾項往下做。無 skill 引用的步驟親自落地；標有 `/tdd-e2e-red`／`/tdd-e2e-green`／`/tdd-e2e-refactor` 的步驟委派並傳入契約參數。成功則勾選進度；失敗則停止並回報，保留已勾項。
+執行 `task-plan` 產物的逐步實作編排器：解析 `plan-package`；若有 `analyze-report.md` 則讀取，有嚴重發現則硬停確認；再確認本輪層別範圍與順序後，依對應 `task-*.md` 從第一個未勾項往下做。無 skill 引用的步驟親自落地；標有 `/tdd-e2e-red`／`/tdd-e2e-green`／`/tdd-e2e-refactor` 的步驟委派並傳入契約參數（Red／Green 為單一 Scenario；Refactor 為單一 US）。成功則勾選進度；失敗則停止並回報，保留已勾項。
 
 # SOP
 

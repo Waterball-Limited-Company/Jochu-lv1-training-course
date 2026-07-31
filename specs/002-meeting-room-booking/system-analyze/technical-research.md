@@ -65,6 +65,62 @@
   - 接公司 SSO／真實 SMTP：超出第一版範圍與本機可重現性
   - 外部國定假日 API：本機／E2E 不穩定；改以本機 `holidays` 表或等價種子
 
+## C4 模型（技術結構視圖）
+
+> 職責：描述系統與外部的關係，以及執行期容器切分。  
+> **不**取代 OOA 的 Class／Sequence（問題域物件與行為見 `system-analyze/ooa.md`）。  
+> 第一版畫到 **Context + Container**；Component 層省略（避免與 OOA Class 重疊）。
+
+### C4 Context
+
+```mermaid
+C4Context
+title 會議室預約系統 — System Context
+
+Person(employee, "員工／主管", "瀏覽會議室、預約、取消自己的預約")
+Person(admin, "設施管理員", "維護會議室與維護時段；亦可一般預約")
+
+System(app, "內部共享會議室預約系統", "本機 Web：登入、預約、總覽、管理")
+
+System_Ext(browser, "Evergreen 瀏覽器", "使用者操作介面執行環境")
+
+Rel(employee, app, "使用（HTTPS／本機 HTTP）")
+Rel(admin, app, "使用（含管理操作）")
+Rel(employee, browser, "透過")
+Rel(admin, browser, "透過")
+Rel(browser, app, "REST + Session Cookie")
+```
+
+**說明**
+
+- 第一版無 SSO、email、外部假日 API、MQ 等外部業務系統；唯一「人↔系統」邊界如上。
+- 瀏覽器標為執行環境，強調前端不直連 DB。
+
+### C4 Container
+
+```mermaid
+C4Container
+title 會議室預約系統 — Containers
+
+Person(user, "使用者", "員工／主管／設施管理員")
+
+System_Boundary(app, "內部共享會議室預約系統") {
+  Container(web, "Frontend", "Vite + TypeScript 原生 DOM", "頁面路由、表單、呼叫 REST")
+  Container(api, "Backend API", "Node.js + Express", "認證、規則、預約與管理 API")
+  ContainerDb(db, "PostgreSQL", "Docker", "應用資料與 session 表唯一真相")
+}
+
+Rel(user, web, "操作 UI")
+Rel(web, api, "REST JSON + Cookie", "Vite proxy /api → :3000")
+Rel(api, db, "SQL via pg", "手寫 SQL；交易／exclusion")
+```
+
+**說明**
+
+- 三容器：`web`／`api`／`db`，對齊 monorepo `frontend/`、`backend/` 與憲法「前端不旁路存取資料庫」。
+- Session 存在 PostgreSQL（`connect-pg-simple`），不另建 Redis 容器。
+- 物件職責與用例互動不在此圖展開 → 見 `ooa.md`。
+
 ## 假設
 
 - 對齊 `spec.md`：無候補、無審核、無重複預約、無與會者邀請；主管角色與員工預約能力相同

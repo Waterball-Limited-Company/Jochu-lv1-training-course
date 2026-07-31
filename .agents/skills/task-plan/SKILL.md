@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Task Plan
 
-依同 package 的 `e2e-test-plan.md`、`plan.md`、`system-analyze/technical-research.md`、`system-analyze/DDL.md`、`system-analyze/api-plan.md`、`system-analyze/ui-plan.md`（依層取用），產出可給 implement 從零執行的實作計畫：規格閱讀、環境建立、各 User Story 的 AC／Edge 與 Red → Green → Refactor（Red 巢狀受測行為、Green 巢狀實作計畫）。寫入 `specs/<NNN-plan-package>/task-plan/task-backend.md`、`task-frontend.md`、`task-integration.md`。
+依同 package 的 `e2e-test-plan.md`、`plan.md`、`system-analyze/technical-research.md`、`system-analyze/DDL.md`、`system-analyze/api-plan.md`、`system-analyze/ui-plan.md`（依層取用），產出可給 **`/implement`** 從零執行的實作計畫：規格閱讀、環境建立、各 User Story 的 AC／Edge 與 Red → Green → Refactor（Red 巢狀受測行為、Green 巢狀實作計畫）。寫入 `specs/<NNN-plan-package>/task-plan/task-backend.md`、`task-frontend.md`、`task-integration.md`。交付後下一步固定為 `/implement`，不得改建議直接依序呼叫 `/tdd-e2e-red`、`/tdd-e2e-green`、`/tdd-e2e-refactor`。
 
 # SOP
 
@@ -31,5 +31,10 @@ disable-model-invocation: true
 
 ## Phase 4 -- 驗證與修正
 
-1. DELEGATE 執行 `uv run .agents/skills/task-plan/scripts/validate_task_plan_output.py --package specs/<NNN-plan-package>`，檢查三檔存在、必要章節、US／Red／Green／Refactor 結構、Scenario 巢狀受測行為、Green 巢狀實作計畫、每個 US Red 末尾固定驗紅項，以及 Red Scenario 與 `e2e-test-plan.md` 各層對齊。
+1. DELEGATE 執行 `uv run .agents/skills/task-plan/scripts/validate_task_plan_output.py --package specs/<NNN-plan-package>`，檢查三檔存在、必要章節、US／Red／Green／Refactor 結構、Scenario 巢狀受測行為、Green 按 `S-n-m` 一格＋巢狀實作計畫（禁止 US 級「全綠」單格）、每個 US 內 Green ID 集合與 Red 一致、Red 末尾固定驗紅項，以及 Red／Green Scenario 與 `e2e-test-plan.md` 各層對齊。
 2. READ 回頭檢查最終產物是否符合本次已載入規則；若不符合，立即修正。
+
+## Phase 5 -- 交付與下游交接
+
+1. READ 讀取 `rules/交付與下游交接判準.md`，確認交付「下一步」必須指向 `/implement`，且不得把 checkbox 上的 `/tdd-e2e-red`、`/tdd-e2e-green`、`/tdd-e2e-refactor` 講成可直接依序呼叫的下一指令。
+2. WRITE 向使用者交付三檔路徑與驗證結果；「下一步」以散文固定導向 `/implement`（可帶 `plan-package`），並簡短說明 task 列上的 `/tdd-e2e-red`、`/tdd-e2e-green`、`/tdd-e2e-refactor` 標籤僅由 implement 依步驟委派，不得改建議在對話中直接依序呼叫。

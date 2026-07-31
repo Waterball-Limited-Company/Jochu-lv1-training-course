@@ -1,0 +1,63 @@
+@startuml ooa-use-case
+skinparam shadowing false
+skinparam defaultFontName "Arial Unicode MS"
+skinparam packageStyle rectangle
+skinparam actorStyle stickman
+skinparam nodesep 20
+skinparam ranksep 25
+
+left to right direction
+
+actor "部門主管" as Mgr
+actor "員工" as Emp
+Mgr --|> Emp
+
+rectangle "會議室預約系統" {
+  package "共用｜員工關聯；主管／管理員繼承取得" as Shared {
+    usecase "UC-01 登入" as UC01
+    usecase "UC-02 瀏覽會議室" as UC02
+    usecase "UC-03 建立單次預約" as UC03
+    usecase "UC-04 檢視今日忙碌概況" as UC04
+    usecase "UC-05 以日曆或列表檢視預約" as UC05
+    usecase "UC-06 查看我的預約" as UC06
+    usecase "UC-07 取消自己的預約" as UC07
+    usecase "UC-11 登出" as UC11
+
+    UC01 -[hidden]down-> UC02
+    UC02 -[hidden]down-> UC03
+    UC03 -[hidden]down-> UC04
+    UC04 -[hidden]down-> UC05
+    UC05 -[hidden]down-> UC06
+    UC06 -[hidden]down-> UC07
+    UC07 -[hidden]down-> UC11
+  }
+
+  package "設施管理｜僅管理員" as Facility {
+    usecase "UC-08 新增會議室" as UC08
+    usecase "UC-09 停用會議室" as UC09
+    usecase "UC-10 設定維護黑名單時段" as UC10
+
+    UC08 -[hidden]down-> UC09
+    UC09 -[hidden]down-> UC10
+  }
+
+  Shared -[hidden]right-> Facility
+}
+
+' 正規 UML：association 只連 Actor ↔ Use Case
+Emp --> UC01
+Emp --> UC02
+Emp --> UC03
+Emp --> UC04
+Emp --> UC05
+Emp --> UC06
+Emp --> UC07
+Emp --> UC11
+
+' 管理員放右側，專屬 UC 短線直連；繼承仍指向員工
+actor "設施管理員" as Admin
+Admin --> UC08
+Admin --> UC09
+Admin --> UC10
+Admin --|> Emp
+@enduml

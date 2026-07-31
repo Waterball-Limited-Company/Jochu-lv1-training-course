@@ -140,7 +140,7 @@ npm test
 
 #### Green
 
-- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+- [ ] `/tdd-e2e-green` — S-1-1 建立「旅行」相簿並一次匯入多格式照片:
   - 實作計畫：
     - 落地 `POST /albums`：寫入 `albums`（DDL）、`name` 驗證、`sort_order` 同分組遞增；不提供巢狀欄位
     - 落地 `POST /albums/:albumId/photos`：multer 收多檔、MIME 限 JPEG／PNG／WebP、原檔進 uploads、sharp 縮圖、列寫入 `photos.album_id`
@@ -148,7 +148,25 @@ npm test
     - 落地 `GET /albums`、`GET /albums/:albumId/photos`：足夠支撐本 US Red 斷言（列表可見空相簿、相簿內含剛上傳／移動後照片）
     - 不支援格式回 415＋共通錯誤形狀；路徑一律 `/api`
 
+- [ ] `/tdd-e2e-green` — S-1-2 將已歸屬照片改加入另一相簿後只留在目標相簿:
+  - 實作計畫：
+    - 只為本支 `S-1-2` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
 
+- [ ] `/tdd-e2e-green` — S-1-3 空相簿尚未加入照片時仍應顯示:
+  - 實作計畫：
+    - 只為本支 `S-1-3` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
+
+- [ ] `/tdd-e2e-green` — S-1-4 選取不支援格式時拒絕匯入並說明支援範圍:
+  - 實作計畫：
+    - 只為本支 `S-1-4` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
+
+- [ ] `/tdd-e2e-green` — S-1-5 拒絕相簿巢狀並維持單層:
+  - 實作計畫：
+    - 只為本支 `S-1-5` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
 
 #### Refactor
 
@@ -183,12 +201,15 @@ npm test
 
 #### Green
 
-- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+- [ ] `/tdd-e2e-green` — S-2-1 主頁依相簿建立日期分組顯示:
   - 實作計畫：
     - 完善 `GET /albums`：由 `created_at` 衍生 `group_date`，組裝 `groups[]`；組內依 `sort_order` 升冪
     - `photo_count` 查詢衍生不落庫；不輸出空日期分組
 
-
+- [ ] `/tdd-e2e-green` — S-2-2 沒有相簿的日期不顯示空白分組:
+  - 實作計畫：
+    - 只為本支 `S-2-2` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
 
 #### Refactor
 
@@ -219,12 +240,10 @@ npm test
 
 #### Green
 
-- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+- [ ] `/tdd-e2e-green` — S-3-2 拖放排序後重新整理或再進主頁仍保留順序:
   - 實作計畫：
     - 落地 `PATCH /albums/reorder`：僅允許同分組；寫回各 album `sort_order`（0 起）；跨組／遺漏 ID 依 api-plan 回 400／404
     - 確認 `GET /albums` 讀回順序與寫入一致
-
-
 
 #### Refactor
 
@@ -260,12 +279,15 @@ npm test
 
 #### Green
 
-- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+- [ ] `/tdd-e2e-green` — S-4-1 打開含多張照片的相簿以平鋪預覽顯示:
   - 實作計畫：
     - 完善 `GET /albums/:albumId/photos`：依 `album_id` 查詢、`created_at` 升冪、組裝 `/media/` URL；縮圖失敗時 `thumbnail_url` 可 null
     - 空相簿不 404（相簿存在時），回空陣列
 
-
+- [ ] `/tdd-e2e-green` — S-4-2 空相簿打開時顯示可理解的空狀態:
+  - 實作計畫：
+    - 只為本支 `S-4-2` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
 
 #### Refactor
 

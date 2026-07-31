@@ -76,12 +76,10 @@ ls backend/package.json frontend/package.json frontend/vite.config.js
 
 #### Green
 
-- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+- [ ] `/tdd-e2e-green` — S-1-2 將已歸屬照片改加入另一相簿後只留在目標相簿（真串接）:
   - 實作計畫：
     - 確認前端移動操作走真 API（非 Mock），body `album_id` 對齊 api-plan
     - 確認後端覆寫歸屬後兩邊讀回一致；必要時修 proxy／錯誤處理／重新載入平鋪的接線，不另開平行契約
-
-
 
 #### Refactor
 
@@ -111,12 +109,10 @@ ls backend/package.json frontend/package.json frontend/vite.config.js
 
 #### Green
 
-- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+- [ ] `/tdd-e2e-green` — S-3-2 拖放排序後重新整理或再進主頁仍保留順序（真串接）:
   - 實作計畫：
     - 確認 DnD 送出的 `group_date`＋完整 `album_ids` 與後端寫入一致
     - 重載路徑不吃過期 Mock；畫面順序對齊 DB `sort_order`
-
-
 
 #### Refactor
 

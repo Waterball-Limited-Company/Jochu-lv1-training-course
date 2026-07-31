@@ -1,0 +1,131 @@
+openapi: 3.0.3
+info:
+  title: {{FEATURE_NAME}} API
+  version: {{API_DOC_VERSION}}
+  description: |
+    功能分支：`{{PLAN_PACKAGE}}`
+    建立日期：{{CREATED_DATE}}
+    狀態：{{DOC_STATUS}}
+
+    ## API Schema 描述
+
+    - **共通 Header**：{{COMMON_HEADERS}}
+    - **時間格式**：{{DATETIME_FORMAT}}
+
+    ## 假設
+
+{{ASSUMPTION_LINES}}
+
+tags:
+  - name: {{TAG_1_NAME}}
+    description: |
+      {{TAG_1_ENTITY_NAME}} 資料實體。
+      **對應 User Story**：{{TAG_1_USER_STORY_LINES}}
+      {{TAG_1_EXTRA_DESCRIPTION}}
+  {{ADDITIONAL_TAG_ENTRIES}}
+
+paths:
+  {{PATH_1}}:
+    {{METHOD_1}}:
+      tags:
+        - {{OPERATION_1_TAG}}
+      summary: {{OPERATION_1_SUMMARY}}
+      description: |
+        {{OPERATION_1_DESCRIPTION}}
+
+        **對應 FR**：{{OPERATION_1_FR_LINES}}
+
+        **設計備註**：{{OPERATION_1_DESIGN_NOTES}}
+
+        **測試規劃**：
+{{OPERATION_1_TEST_PLAN_LINES}}
+      operationId: {{OPERATION_1_OPERATION_ID}}
+      {{OPERATION_1_SECURITY_BLOCK}}
+      {{OPERATION_1_PARAMETERS_BLOCK}}
+      {{OPERATION_1_REQUEST_BODY_BLOCK}}
+      responses:
+{{OPERATION_1_RESPONSE_ENTRIES}}
+      {{OPERATION_1_X_TRACEABILITY_BLOCK}}
+
+  {{ADDITIONAL_PATH_OPERATIONS}}
+
+components:
+  securitySchemes:
+    {{SECURITY_SCHEME_NAME}}:
+      type: {{SECURITY_SCHEME_TYPE}}
+      in: {{SECURITY_SCHEME_IN}}
+      name: {{SECURITY_SCHEME_PARAM_NAME}}
+      description: |
+        {{SECURITY_SCHEME_DESCRIPTION}}
+
+  parameters:
+    {{PATH_PARAM_1_NAME}}:
+      name: {{PATH_PARAM_1_KEY}}
+      in: path
+      required: true
+      description: {{PATH_PARAM_1_DESCRIPTION}}
+      schema:
+        $ref: '#/components/schemas/Uuid'
+      example: {{PATH_PARAM_1_EXAMPLE}}
+    {{ADDITIONAL_PATH_PARAMETERS}}
+
+  responses:
+    {{SHARED_RESPONSE_1_NAME}}:
+      description: {{SHARED_RESPONSE_1_DESCRIPTION}}
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: {{SHARED_RESPONSE_1_ERROR_CODE}}
+              message: {{SHARED_RESPONSE_1_ERROR_MESSAGE}}
+              details: []
+    {{ADDITIONAL_SHARED_RESPONSES}}
+
+  schemas:
+    Uuid:
+      type: string
+      format: uuid
+      description: 對外資源 ID（UUID 字串）
+
+    ErrorResponse:
+      type: object
+      description: |
+        全檔共用的錯誤回應格式。
+        各 Endpoint 仍逐一列出可能的 error status 與完整錯誤範例。
+      properties:
+        error:
+          type: object
+          description: 共通錯誤本體
+          properties:
+            code:
+              type: string
+              description: 錯誤代碼
+            message:
+              type: string
+              description: 人類可讀的錯誤訊息
+            details:
+              type: array
+              description: 可選的欄位、規則或衝突細節
+              items:
+                type: object
+          required:
+            - code
+            - message
+            - details
+      required:
+        - error
+
+    {{SCHEMA_1_NAME}}:
+{{SCHEMA_1_BODY}}
+
+    {{ADDITIONAL_SCHEMAS}}
+
+# 填寫指引（骨架註解；產出成品時可刪除此段註解）
+# 1. 固定：openapi 必須為 3.0.3；輸出檔為 YAML；主產物路徑為 specs/<PLAN_PACKAGE>/system-analyze/openapi.yaml。
+# 2. tags：每個資料實體一筆；description 含對應 US 與必要說明。
+# 3. paths：只包含來源規格推得的 path/method；公開端點用 security: []，受保護端點沿用 securitySchemes。
+# 4. 每個 operation 保留 summary、description（含 FR、設計備註、測試規劃）、operationId、responses；可選 x-traceability。
+# 5. 錯誤回應一律可 $ref ErrorResponse 或 components.responses 共用項；對外 ID 用 Uuid（string + format: uuid）。
+# 6. ADDITIONAL_* 槽位：複製對應區塊結構繼續擴充，勿改固定鍵名與 OpenAPI 語法。

@@ -33,10 +33,16 @@ RED_VERIFY_RE = re.compile(
 SCENARIO_RED_ITEM_RE = re.compile(
     r"(?m)^\s*-\s*\[[ xX]\]\s*`?/tdd-e2e-red`?\s*—\s*(S-\d+-\d+)\s+"
 )
+SCENARIO_GREEN_ITEM_RE = re.compile(
+    r"(?m)^\s*-\s*\[[ xX]\]\s*`?/tdd-e2e-green`?\s*—\s*(S-\d+-\d+)\s+"
+)
 ANY_RED_ITEM_RE = re.compile(r"(?m)^\s*-\s*\[[ xX]\]\s*`?/tdd-e2e-red`?")
+ANY_GREEN_ITEM_RE = re.compile(r"(?m)^\s*-\s*\[[ xX]\]\s*`?/tdd-e2e-green`?")
 E2E_SCENARIO_RE = re.compile(r"^#### Scenario:\s+(S-\d+-\d+)\s+", re.M)
 PLACEHOLDER_RE = re.compile(r"\{\{[A-Z0-9_]+\}\}")
-
+PACKED_GREEN_RE = re.compile(
+    r"(?m)^\s*-\s*\[[ xX]\]\s*`?/tdd-e2e-green`?\s*—\s*.*全綠"
+)
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -112,15 +118,8 @@ def validate_task_file(path: Path, layer: str, expected_ids: list[str]) -> list[
             if sub not in block:
                 errors.append(f"{path.name}: {match.group(1)} missing {sub}")
 
-        # Green nested plan
-        if "#### Green" in block:
-            green = block.split("#### Green", 1)[1]
-            if "#### Refactor" in green:
-                green = green.split("#### Refactor", 1)[0]
-            if "/tdd-e2e-green" not in green:
-                errors.append(f"{path.name}: {match.group(1)} Green missing /tdd-e2e-green")
-            if "實作計畫：" not in green and "實作計畫:" not in green:
-                errors.append(f"{path.name}: {match.group(1)} Green missing nested 實作計畫")
+        red_ids: list[str] = []
+        green_ids: list[str] = []
 
         # Red: Scenario items need nested plan; final item is fixed verify checkbox
         if "#### Red" in block:
@@ -167,11 +166,58 @@ def validate_task_file(path: Path, layer: str, expected_ids: list[str]) -> list[
                             f"{path.name}: {match.group(1)} a Scenario Red item "
                             "lacks nested 受測行為"
                         )
+                red_ids = SCENARIO_RED_ITEM_RE.findall(red)
 
-    actual_ids = SCENARIO_RED_ITEM_RE.findall(text)
-    if actual_ids != expected_ids:
+        # Green: one checkbox per Scenario (same S-n-m set as Red); nested 實作計畫
+        if "#### Green" in block:
+            green = block.split("#### Green", 1)[1]
+            if "#### Refactor" in green:
+                green = green.split("#### Refactor", 1)[0]
+            if PACKED_GREEN_RE.search(green):
+                errors.append(
+                    f"{path.name}: {match.group(1)} Green must not pack whole US "
+                    "（禁止「全綠」單格）"
+                )
+            green_item_matches = list(ANY_GREEN_ITEM_RE.finditer(green))
+            if not green_item_matches:
+                errors.append(f"{path.name}: {match.group(1)} Green has no /tdd-e2e-green items")
+            else:
+                for j, item in enumerate(green_item_matches):
+                    chunk_end = (
+                        green_item_matches[j + 1].start()
+                        if j + 1 < len(green_item_matches)
+                        else len(green)
+                    )
+                    chunk = green[item.start() : chunk_end]
+                    if not SCENARIO_GREEN_ITEM_RE.match(chunk):
+                        errors.append(
+                            f"{path.name}: {match.group(1)} Green item "
+                            "must be Scenario S-n-m"
+                        )
+                    if "實作計畫：" not in chunk and "實作計畫:" not in chunk:
+                        errors.append(
+                            f"{path.name}: {match.group(1)} a Scenario Green item "
+                            "lacks nested 實作計畫"
+                        )
+                green_ids = SCENARIO_GREEN_ITEM_RE.findall(green)
+
+            if red_ids and green_ids != red_ids:
+                errors.append(
+                    f"{path.name}: {match.group(1)} Green Scenario IDs {green_ids} "
+                    f"!= Red {red_ids}"
+                )
+
+    actual_red_ids = SCENARIO_RED_ITEM_RE.findall(text)
+    if actual_red_ids != expected_ids:
         errors.append(
-            f"{path.name}: Red Scenario IDs {actual_ids} != e2e ## {layer} {expected_ids}"
+            f"{path.name}: Red Scenario IDs {actual_red_ids} != e2e ## {layer} {expected_ids}"
+        )
+
+    actual_green_ids = SCENARIO_GREEN_ITEM_RE.findall(text)
+    if actual_green_ids != expected_ids:
+        errors.append(
+            f"{path.name}: Green Scenario IDs {actual_green_ids} "
+            f"!= e2e ## {layer} {expected_ids}"
         )
 
     return errors

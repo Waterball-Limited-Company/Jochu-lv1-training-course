@@ -119,14 +119,32 @@ npm pkg get scripts
 
 #### Green
 
-- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+- [ ] `/tdd-e2e-green` — S-1-1 建立「旅行」相簿並一次匯入多格式照片:
   - 實作計畫：
     - `api.js`＋主頁：建立相簿表單／Modal，呼叫 `POST /albums`，成功導向詳情（帶 id／name）
     - 相簿詳情：檔案選取器多檔上傳 → `POST .../photos`；平鋪區追加結果
     - 「移至其他相簿」→ `PATCH /photos/:id`，成功後從目前平鋪移除
     - 錯誤態：415／驗證錯誤顯示於 UI；結構上禁止巢狀操作
 
+- [ ] `/tdd-e2e-green` — S-1-2 將已歸屬照片改加入另一相簿後只留在目標相簿:
+  - 實作計畫：
+    - 只為本支 `S-1-2` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
 
+- [ ] `/tdd-e2e-green` — S-1-3 空相簿尚未加入照片時仍應顯示:
+  - 實作計畫：
+    - 只為本支 `S-1-3` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
+
+- [ ] `/tdd-e2e-green` — S-1-4 選取不支援格式時拒絕匯入並說明支援範圍:
+  - 實作計畫：
+    - 只為本支 `S-1-4` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
+
+- [ ] `/tdd-e2e-green` — S-1-5 拒絕相簿巢狀並維持單層:
+  - 實作計畫：
+    - 只為本支 `S-1-5` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
 
 #### Refactor
 
@@ -163,12 +181,15 @@ npm pkg get scripts
 
 #### Green
 
-- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+- [ ] `/tdd-e2e-green` — S-2-1 主頁依相簿建立日期分組顯示:
   - 實作計畫：
     - `render.js`（或等效）依 `groups[]` 畫主頁；組內依回傳順序／`sort_order`
     - 空列表與載入／錯誤提示對齊 ui-plan
 
-
+- [ ] `/tdd-e2e-green` — S-2-2 沒有相簿的日期不顯示空白分組:
+  - 實作計畫：
+    - 只為本支 `S-2-2` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
 
 #### Refactor
 
@@ -209,12 +230,20 @@ npm pkg get scripts
 
 #### Green
 
-- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+- [ ] `/tdd-e2e-green` — S-3-1 拖放後主頁立即依新順序顯示相簿:
   - 實作計畫：
     - `dnd.js`：同組內拖放、更新 DOM、組 `album_ids` 呼叫 reorder API
     - 重載後依 `sort_order`／回傳順序渲染；單相簿邊界友善處理
 
+- [ ] `/tdd-e2e-green` — S-3-2 拖放排序後重新整理或再進主頁仍保留順序:
+  - 實作計畫：
+    - 只為本支 `S-3-2` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
 
+- [ ] `/tdd-e2e-green` — S-3-3 僅一個相簿時拖放不造成錯誤或混淆:
+  - 實作計畫：
+    - 只為本支 `S-3-3` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
 
 #### Refactor
 
@@ -250,12 +279,15 @@ npm pkg get scripts
 
 #### Green
 
-- [ ] `/tdd-e2e-green` — 讓本 US 既有 Red 全綠:
+- [ ] `/tdd-e2e-green` — S-4-1 打開含多張照片的相簿以平鋪預覽顯示:
   - 實作計畫：
     - 詳情頁載入列表＋平鋪／空狀態分支（ui-plan 業務邏輯 4）
     - 標題 `name` 由導覽狀態帶入，不另開 GET 單筆相簿 API
 
-
+- [ ] `/tdd-e2e-green` — S-4-2 空相簿打開時顯示可理解的空狀態:
+  - 實作計畫：
+    - 只為本支 `S-4-2` 既有 Red 變綠做 just enough；不打包同 US 其他 Scenario
+    - 對齊本支受測行為與契約；跑全套確認本支綠且不弄紅既有綠
 
 #### Refactor
 
