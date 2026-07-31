@@ -6,7 +6,6 @@ applies_to:
   - data-plan
   - e2e-test-plan
   - implement
-  - ooa-plan
   - specify
   - system-analyze
   - task-plan

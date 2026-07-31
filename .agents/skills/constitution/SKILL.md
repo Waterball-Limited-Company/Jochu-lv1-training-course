@@ -12,7 +12,7 @@ disable-model-invocation: true
 
 ## Phase 1 -- 收斂寫入目標並判定新建或修訂
 
-1. WRITE 向使用者列出可建立／修訂的憲法目標並請其多選：第一個選項永遠是 `core`，其餘為交付 skill 名（至少包含 analyze、api-plan、data-plan、e2e-test-plan、implement、ooa-plan、specify、system-analyze、task-plan、technical-research、tdd-e2e-green、tdd-e2e-red、tdd-e2e-refactor、ui-plan）；未獲選擇前停止。
+1. WRITE 向使用者列出可建立／修訂的憲法目標並請其多選：第一個選項永遠是 `core`，其餘為交付 skill 名（至少包含 analyze、api-plan、data-plan、e2e-test-plan、implement、specify、system-analyze、task-plan、technical-research、tdd-e2e-green、tdd-e2e-red、tdd-e2e-refactor、ui-plan）；未獲選擇前停止。
 2. READ 讀取使用者需求，以及每個已選目標對應的既有檔（若存在）：`.constitution/core.md` 或 `.constitution/<skill-name>.md`。
 3. READ 讀取 `rules/產物路徑與改動邊界.md`，確認輸出路徑、front matter、建立／修訂邊界、完成條件。
 4. THINK 依本次已載入規則，為每個目標判定「新建」或「修訂」，並整理待寫入的變更意圖與 metadata 預期。
