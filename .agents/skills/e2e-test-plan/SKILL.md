@@ -29,8 +29,8 @@ disable-model-invocation: true
 
 ## Phase 3 -- 展開 Scenario、落點與對應欄位
 
-1. READ 讀取 `rules/Scenario產生與AC-Edge對齊判準.md`、`rules/落點與證明區塊判準.md`、`rules/Gherkin領域語言與步驟結構判準.md`、`rules/對應欄位與測試摘要總表判準.md`，確認 Scenario 切分、落點、GWT 寫法、對應欄位與摘要總表格式；若 Phase 1 已載入資料合約規則，一併套用。
-2. THINK 依本次已載入規則，依 AC／Edge 決定後端／前端／整合落點，展開領域語言 Scenario、對齊 `api-plan`／`ui-plan` 以及（若有）`data-plan`／`DDL` 可測約束、補齊對應欄位與測試摘要總表，並整理檔末假設。
+1. READ 讀取 `rules/Scenario產生與AC-Edge對齊判準.md`、`rules/落點與證明區塊判準.md`、`rules/Gherkin領域語言與步驟結構判準.md`、`rules/對應欄位與測試摘要總表判準.md`、`rules/認證基線Scenario判準.md`，確認 Scenario 切分、落點、GWT 寫法、對應欄位、摘要總表格式，以及有認證時的 Auth 基線義務；若 Phase 1 已載入資料合約規則，一併套用。
+2. THINK 依本次已載入規則，依 AC／Edge 決定後端／前端／整合落點，展開領域語言 Scenario、對齊 `api-plan`／`ui-plan` 以及（若有）`data-plan`／`DDL` 可測約束、補齊 Auth 基線（若適用）、對應欄位與測試摘要總表，並整理檔末假設。
 
 ## Phase 4 -- 寫出 e2e-test-plan
 

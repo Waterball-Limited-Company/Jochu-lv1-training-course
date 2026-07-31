@@ -9,7 +9,7 @@ applies_to:
 **建立日期**: 2026-07-31
 **最後修訂**: 2026-07-31
 **狀態**: 生效
-**版本**: `1.2.0`
+**版本**: `1.3.0`
 
 本檔為 `api-plan` 面向憲法。跨 skill 原則與堆疊見 `.constitution/core.md`。本檔約束 API 契約形狀；個別功能的 path、業務欄位由該功能之 `api-plan.md` 產物定之。
 
@@ -20,7 +20,8 @@ applies_to:
 - MUST：對外錯誤回應至少包含 `error.code` 與 `error.message`（形狀見下方例子）。
 - MUST：對外資源識別為字串型穩定 UUID；MUST NOT 將可預測自增整數作為對外主鍵曝露。
 - MUST：`api-plan` 產物描述查詢／列表 endpoint 時，MUST 寫出上述查詢參數與 response envelope（可引用本檔例子，不得省略形狀）。
-- MUST NOT：把單一功能業務欄位表（例如某 POST body 必填欄）寫進本憲法；那些屬該功能 `api-plan` 產物。
+- MUST：若本期採帳密或伺服端 session 認證，`api-plan` 產物 MUST 定義登入、登出、目前使用者還原三類能力，且其錯誤形狀與 session／cookie 語意與全站一致；MUST NOT 僅在業務 endpoint 註記「需登入」卻省略認證契約。
+- MUST NOT：把單一功能業務欄位表（例如某 POST body 必填欄）或具體 auth path 寫進本憲法；那些屬該功能 `api-plan` 產物。
 
 查詢參數（固定）：
 

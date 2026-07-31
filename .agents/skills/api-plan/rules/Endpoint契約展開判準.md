@@ -166,3 +166,29 @@
 ```md
 （寫完最後一個 Endpoint 就結束）
 ```
+
+# Rule 6 - 有帳密／session 認證時必須定義登入、登出與目前使用者還原
+
+- Level: `MUST`
+- 當本期採帳密或伺服端 session 認證（見 `technical-research`／`.constitution`）時，`api-plan.md` MUST 定義足以支撐「登入、登出、還原目前使用者」三類能力的 Endpoint（path／方法名依功能而定），並展開成功與主要錯誤回應。
+- MUST NOT 只在業務 Endpoint 的設計備註寫「需已登入」，卻完全省略認證相關 Endpoint。
+- 個別欄位與 path 屬該功能產物；本規則只強制能力齊套，不把具體 path 寫死進 skill。
+
+## Good Example
+
+- 這個例子是好的，因為三類能力都有 Endpoint。
+
+```md
+### Endpoint：`POST /api/auth/login`
+### Endpoint：`POST /api/auth/logout`
+### Endpoint：`GET /api/auth/me`
+```
+
+## Bad Example
+
+- 這個例子是壞的，因為只有業務 API，認證靠口頭假設。
+
+```md
+### Endpoint：`POST /api/bookings`
+設計備註：呼叫前使用者必須已登入（未定義任何 auth endpoint）
+```

@@ -1,12 +1,12 @@
 ---
 name: implement
-description: 依 specs/<plan-package>/task-plan/ 的 task 逐步實作：進場解析 package；若有 analyze-report.md 則讀取，嚴重項硬停確認後才進入範圍選單；§1／§2 親自執行；§3 的 /tdd-e2e-red|green|refactor 委派；逐步勾選 checkbox；失敗即停並回報。Use when the user invokes /implement, asks to execute task-plan implementation, or continue from unchecked task items.
+description: 依 specs/<plan-package>/task-plan/ 的 task 逐步實作：進場解析 package；若有 analyze-report.md 則讀取，嚴重項硬停確認後才進入範圍選單；§1／§2 親自執行；§3 的 /tdd-e2e-red 按 US 批次委派、green 按 Scenario、refactor 按 US；逐步勾選 checkbox；失敗即停並回報。Use when the user invokes /implement, asks to execute task-plan implementation, or continue from unchecked task items.
 disable-model-invocation: true
 ---
 
 # Implement
 
-執行 `task-plan` 產物的逐步實作編排器：解析 `plan-package`；若有 `analyze-report.md` 則讀取，有嚴重發現則硬停確認；再確認本輪層別範圍與順序後，依對應 `task-*.md` 從第一個未勾項往下做。無 skill 引用的步驟親自落地；標有 `/tdd-e2e-red`／`/tdd-e2e-green`／`/tdd-e2e-refactor` 的步驟委派並傳入契約參數（Red／Green 為單一 Scenario；Refactor 為單一 US）。成功則勾選進度；失敗則停止並回報，保留已勾項。
+執行 `task-plan` 產物的逐步實作編排器：解析 `plan-package`；若有 `analyze-report.md` 則讀取，有嚴重發現則硬停確認；再確認本輪層別範圍與順序後，依對應 `task-*.md` 從第一個未勾項往下做。無 skill 引用的步驟親自落地；標有 `/tdd-e2e-red` 的 Scenario 格改為**同一 US 批次委派**（內部仍一支測一跑）；`/tdd-e2e-green` 為單一 Scenario；`/tdd-e2e-refactor` 為單一 US。成功則勾選進度；失敗則停止並回報，保留已勾項。
 
 # SOP
 
