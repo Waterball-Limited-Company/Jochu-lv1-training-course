@@ -62,7 +62,7 @@
 # Rule 3 - 未澄清的邊界標 blocked，不產出可執行 Scenario
 
 - Level: `MUST`
-- 含 `[NEED CLARIFICATION: …]` 或明確依賴未拍板決策的 Edge，本輪不寫可執行 Scenario，改在「未產出 Scenario 的邊界（blocked）」表列原因。
+- 含 `[NEEDS CLARIFICATION: …]` 或明確依賴未拍板決策的 Edge，本輪不寫可執行 Scenario，改在「未產出 Scenario 的邊界（blocked）」表列原因。
 - 不可自行腦補行為後當成已覆蓋。
 
 ## Good Example
@@ -74,7 +74,7 @@
 
 | ID | 描述 | 阻塞原因 |
 | --- | --- | --- |
-| Edge-3-2 | … | [NEED CLARIFICATION: 日期分組與自訂順序共存規則未定] |
+| Edge-3-2 | … | [NEEDS CLARIFICATION: 日期分組與自訂順序共存規則未定] |
 ```
 
 ## Bad Example

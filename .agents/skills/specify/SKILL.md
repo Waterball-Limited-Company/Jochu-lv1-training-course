@@ -1,10 +1,10 @@
 ---
-name: my-specify
+name: specify
 description: 將使用者的產品需求敘述穩定轉成以 User Story 為主體的功能規格，先完成語意映射與故事切分，再依樣板產出 spec，並在輸出前做結構驗證。
 disable-model-invocation: true
 ---
 
-# My Specify
+# Specify
 
 把使用者 prompt 轉成可驗證的功能規格時，先建立單一溯源的語意映射，再依固定判準切出使用者故事、全域約束、待澄清項與成功標準，最後才回填 spec 樣板，並將產物統一收納在 `/specs/<NNN-plan-package>/`：語意映射寫入 `/specs/<NNN-plan-package>/spec-mapping-checklist.md`，最終規格寫入 `/specs/<NNN-plan-package>/spec.md`。若高影響缺口尚未拍板，必須先呼叫 `/clarify` 收斂，不得直接猜寫規格。
 
@@ -35,7 +35,7 @@ disable-model-invocation: true
 ## Phase 4 -- 檢查一致性並修補
 
 1. READ 讀取 `rules/產出一致性檢查清單.md`，逐項檢查輸出是否覆蓋所有輸入語意、故事結構是否完整、`FR` 與 `成功標準` 是否全數正確歸屬，以及全域規則與待澄清項是否放在正確位置。
-2. DELEGATE 執行 `uv run .agents/skills/my-specify/scripts/validate_spec_output.py --package <NNN-plan-package>`，檢查 `/specs/<NNN-plan-package>/spec.md` 的章節完整性、編號連續性、placeholder 殘留與基礎格式正確性。
+2. DELEGATE 執行 `uv run .agents/skills/specify/scripts/validate_spec_output.py --package <NNN-plan-package>`，檢查 `/specs/<NNN-plan-package>/spec.md` 的章節完整性、編號連續性、placeholder 殘留與基礎格式正確性。
 3. THINK 若 checklist 或 validator 失敗，回推是語意切分、故事歸屬、成功標準、情境撰寫或樣板回填出錯，並收斂最小修補範圍。
 4. WRITE 依修補結果更新 spec；若修補後仍失敗，回到前一 phase 重建對應內容。
 

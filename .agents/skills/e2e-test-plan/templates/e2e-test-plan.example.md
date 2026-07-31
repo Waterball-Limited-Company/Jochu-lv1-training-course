@@ -692,7 +692,7 @@ Scenario: 拖放排序後重新整理或再進主頁仍保留順序
 
 ## 未產出 Scenario 的邊界（blocked）
 
-本期 `spec.md` 邊界條件無 `[NEED CLARIFICATION]`，亦無依賴未澄清決策的邊界；本輪無 blocked 項。
+本期 `spec.md` 邊界條件無 `[NEEDS CLARIFICATION]`，亦無依賴未澄清決策的邊界；本輪無 blocked 項。
 
 
 | ID  | 描述  | 阻塞原因 |
@@ -734,7 +734,7 @@ Scenario: 拖放排序後重新整理或再進主頁仍保留順序
 - 檔末「測試摘要總表」以一列一條 AC／Edge 標示落點；FR 只留在各 Scenario 對應欄位。
 - Gherkin 慣例：`Given`／`Then` 可用 `And` 延續；`When` 僅一條操作步驟（不在 When 後接 And）。
 - AC 與全域邊界語意重複時合併為單一 Scenario，並在「AC / Edge」同時列出（見 S-1-2）；摘要表仍拆成兩列。
-- 本期無 `[NEED CLARIFICATION]` 邊界，故無 blocked Scenario。
+- 本期無 `[NEEDS CLARIFICATION]` 邊界，故無 blocked Scenario。
 - Edge ID（Edge-x-y／Edge-G-y）為本計畫為追溯穩定而編號；Edge-x-y 對應各 US「邊界情境」條列順序，Edge-G-y 對應「全域邊界情境」條列順序。
 - S-3-1、S-3-3 主要落點為互動呈現，本輪僅寫前端；S-3-2 才涵蓋順序持久化之後端與整合。
 - 拖放僅限同 `group_date` 分組內等實作細節以 `ui-plan`／`api-plan` 為準；Gherkin 不綁定跨組規則原文。

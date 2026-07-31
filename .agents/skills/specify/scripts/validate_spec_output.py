@@ -29,7 +29,7 @@ class StoryBlock:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="檢查 my-specify 產出的 spec 結構是否有效。")
+    parser = argparse.ArgumentParser(description="檢查 specify 產出的 spec 結構是否有效。")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--input", help="要直接檢查的 spec Markdown 檔案路徑")
     group.add_argument("--package", help="要檢查的 NNN-plan-package；預設會對應到 specs/<package>/spec.md")

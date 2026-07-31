@@ -21,10 +21,10 @@ disable-model-invocation: true
 7. READ 讀取 `rules/輸出檔案定位判準.md`，確認最終 `e2e-test-plan.md` 的目錄與檔名。
 8. THINK 依本次已載入規則，整理 `plan-package`、目標路徑與標題 metadata（功能分支／建立日期／狀態）。
 
-## Phase 2 -- 掃描 NEED CLARIFICATION 並決定是否先澄清
+## Phase 2 -- 掃描 NEEDS CLARIFICATION 並決定是否先澄清
 
 1. READ 讀取 `rules/Scenario產生與AC-Edge對齊判準.md` 中關於 blocked 的規則，確認未澄清邊界如何標示與是否可產出 Scenario。
-2. THINK 掃描 `spec.md` 各 US 邊界條件中的 `[NEED CLARIFICATION: ...]`（及依賴未澄清決策的邊界），列出將標為 blocked、本輪不產出 Scenario 的項目。
+2. THINK 掃描 `spec.md` 各 US 邊界條件中的 `[NEEDS CLARIFICATION: ...]`（及依賴未澄清決策的邊界），列出將標為 blocked、本輪不產出 Scenario 的項目。
 3. DELEGATE 若存在上述項目，先詢問使用者是否呼叫 `/clarify` 釐清；若使用者同意則委派 `/clarify`，並在澄清結果回寫 `spec.md` 後重新進入本 phase；若使用者選擇暫不澄清，則帶著 blocked 清單繼續，不自行腦補行為。
 
 ## Phase 3 -- 展開 Scenario、落點與對應欄位
