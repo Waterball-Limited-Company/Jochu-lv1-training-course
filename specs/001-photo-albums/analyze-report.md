@@ -54,7 +54,7 @@
 | US1-FR3 | 一次多選 JPEG／PNG／WebP | 同上上傳合約；mime 約束                            | S-1-1、S-1-4 | task-backend、task-frontend                  | Edge-1-2 對不支援格式               |
 | US1-FR4 | 改歸屬＝移動             | `PATCH /photos/:id`；相簿詳情「移至其他相簿」          | S-1-2       | task-backend、task-frontend、task-integration | 對齊 GR-002                     |
 | US2-FR1 | 主頁顯示所有相簿           | `GET /albums`；主頁                          | S-2-1       | task-backend、task-frontend                  | —                             |
-| US2-FR2 | 依建立日期分組            | `GET /albums` 之 `group_date`；業務邏輯 2       | S-2-1、S-2-2 | task-backend、task-frontend                  | —                             |
+| US2-FR2 | 依建立日期分組            | `GET /albums` 之 `group_date`；使用者故事 2       | S-2-1、S-2-2 | task-backend、task-frontend                  | —                             |
 | US3-FR1 | 主頁拖放重排             | 主頁拖放；`PATCH /albums/reorder`              | S-3-1、S-3-3 | task-frontend（互動）；持久化見 FR2                  | S-3-1／S-3-3 僅前端落點（與 e2e 摘要一致） |
 | US3-FR2 | 保存重排順序             | `PATCH /albums/reorder`；`sort_order`      | S-3-2       | task-backend、task-frontend、task-integration | —                             |
 | US4-FR1 | 進入單一相簿             | `GET /albums/:albumId/photos`；相簿詳情        | S-4-1、S-4-2 | task-backend、task-frontend                  | —                             |
@@ -123,7 +123,7 @@
 
 - e2e 對應欄位所引 API（`POST/GET/PATCH` 各路徑）皆存在於 `api-plan.md` 追溯總表。
 - `data-plan`／`DDL`：`Album 1—0..* Photo`、`album_id` FK、無 `parent_album_id`，與 GR-001／GR-002 一致。
-- UI 頁面（主頁、相簿詳情）與業務邏輯 1–4 所對 API 皆可對回 api-plan（僅路徑參數表記見一致-1）。
+- UI 頁面（主頁、相簿詳情）與使用者故事 1–4 所對 API 皆可對回 api-plan（僅路徑參數表記見一致-1）。
 - task 各層 Scenario 集合與 e2e 測試摘要總表落點一致（含 S-3-1／S-3-3 僅前端、整合僅 S-1-2／S-3-2）。
 
 ---

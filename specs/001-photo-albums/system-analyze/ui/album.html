@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>相簿</title>
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-lead">
+      <a class="btn btn-ghost" href="index.html">所有相簿</a>
+      <h1 id="albumTitle">相簿</h1>
+    </div>
+    <button class="btn btn-primary" type="button" id="addPhotos">加入照片</button>
+    <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" multiple />
+  </header>
+
+  <div class="banner" id="banner"></div>
+  <p class="status hidden" id="loading">載入照片中…</p>
+
+  <section class="empty" id="empty">
+    <h2>這個相簿還沒有照片</h2>
+    <p>選取本機的 JPEG、PNG 或 WebP，一次可加入多張。</p>
+    <button class="btn btn-primary" type="button" id="addPhotosEmpty">加入照片</button>
+  </section>
+
+  <div class="photo-grid" id="grid"></div>
+
+  <aside class="move-panel" id="movePanel">
+    <h2>移至其他相簿</h2>
+    <div id="moveTargets"></div>
+    <button class="btn btn-secondary" type="button" id="cancelMove">取消</button>
+  </aside>
+
+  <script>
+    const albums = {
+      alb_01HZX2K9M3Q8R7N6P5T4V3W2X1: { name: "旅行", photos: [
+        { id: "pho_01HZX3A1B2C3D4E5F6G7H8J9K0", name: "IMG_20260711_090015.jpg", tone: "tone-clay" },
+        { id: "pho_01HZX3A1B2C3D4E5F6G7H8J9K1", name: "screenshot.png", tone: "tone-olive" },
+        { id: "pho_01HZX3A1B2C3D4E5F6G7H8J9K2", name: "beach.webp", tone: "tone-dusk" },
+        { id: "pho_01HZX3A1B2C3D4E5F6G7H8J9K3", name: "night-market.jpg", tone: "tone-sand" },
+        { id: "pho_01HZX3A1B2C3D4E5F6G7H8J9K4", name: "trail.png", tone: "tone-moss" }
+      ]},
+      alb_01HZX2K9M3Q8R7N6P5T4V3W2Y2: { name: "家庭", photos: [] },
+      alb_01HZX2K9M3Q8R7N6P5T4V3W2Z3: { name: "工作", photos: [
+        "desk.jpg", "standup.png", "whiteboard.webp", "lunch.jpg",
+        "sprint.png", "release.webp", "office.jpg", "meeting.png",
+        "cables.webp", "badge.jpg", "plan.png", "ship.webp"
+      ].map((name, index) => ({
+        id: "pho_work_" + index,
+        name,
+        tone: ["tone-slate", "tone-dusk", "tone-olive", "tone-sand"][index % 4]
+      }))}
+    };
+
+    const COPY = {
+      unsupported: "僅支援 JPEG、PNG、WebP",
+      uploadError: "無法加入照片",
+      moveError: "無法移動照片",
+      moveNone: "沒有其他相簿可移入",
+      move: "移至其他相簿"
+    };
+
+    const others = [
+      { id: "alb_01HZX2K9M3Q8R7N6P5T4V3W2X1", name: "旅行" },
+      { id: "alb_01HZX2K9M3Q8R7N6P5T4V3W2Y2", name: "家庭" },
+      { id: "alb_01HZX2K9M3Q8R7N6P5T4V3W2Z3", name: "工作" }
+    ];
+
+    const params = new URLSearchParams(location.search);
+    const albumId = params.get("id") || "";
+    const albumName = params.get("name") || (albums[albumId] && albums[albumId].name) || "";
+    const banner = document.getElementById("banner");
+    const empty = document.getElementById("empty");
+    const grid = document.getElementById("grid");
+    const loading = document.getElementById("loading");
+    const fileInput = document.getElementById("fileInput");
+    const movePanel = document.getElementById("movePanel");
+    const moveTargets = document.getElementById("moveTargets");
+    let movingPhotoId = null;
+    const moveTargetsSource = params.get("alone") === "1" ? [] : others;
+
+    if (!albumId || albumId === "missing" || (!albums[albumId] && !albumName)) {
+      location.replace("index.html?notice=not_found");
+    } else {
+    document.getElementById("albumTitle").textContent = albumName || "相簿";
+    document.title = albumName || "相簿";
+
+    const state = albums[albumId] || { name: albumName, photos: [] };
+
+    function showBanner(text, isError) {
+      banner.classList.add("is-visible");
+      banner.classList.toggle("is-error", Boolean(isError));
+      banner.textContent = text;
+    }
+
+    function isUnsupported(file) {
+      const name = file.name || "";
+      const type = (file.type || "").toLowerCase();
+      if (/\.(heic|heif)$/i.test(name)) return true;
+      if (type === "image/heic" || type === "image/heif") return true;
+      if (type.startsWith("image/") && !/^image\/(jpeg|jpg|png|webp)$/.test(type)) return true;
+      return !/\.(jpe?g|png|webp)$/i.test(name);
+    }
+
+    function render() {
+      grid.innerHTML = "";
+      if (state.photos.length === 0) {
+        empty.classList.add("is-visible");
+        grid.classList.add("hidden");
+        return;
+      }
+      empty.classList.remove("is-visible");
+      grid.classList.remove("hidden");
+      state.photos.forEach((photo) => {
+        const tile = document.createElement("article");
+        tile.className = "photo-tile";
+        tile.dataset.photoId = photo.id;
+        const thumb = document.createElement("span");
+        thumb.className = "thumb " + photo.tone;
+        thumb.setAttribute("aria-hidden", "true");
+        const meta = document.createElement("div");
+        meta.className = "photo-meta";
+        const title = document.createElement("h2");
+        title.textContent = photo.name;
+        meta.appendChild(title);
+        const actions = document.createElement("div");
+        actions.className = "photo-actions";
+        const moveBtn = document.createElement("button");
+        moveBtn.type = "button";
+        moveBtn.textContent = COPY.move;
+        moveBtn.addEventListener("click", () => openMove(photo.id));
+        actions.appendChild(moveBtn);
+        tile.append(thumb, meta, actions);
+        grid.appendChild(tile);
+      });
+    }
+
+    function openMove(photoId) {
+      movingPhotoId = photoId;
+      const targets = moveTargetsSource.filter((album) => album.id !== albumId);
+      moveTargets.replaceChildren();
+      if (targets.length === 0) {
+        const note = document.createElement("p");
+        note.textContent = COPY.moveNone;
+        moveTargets.appendChild(note);
+      } else {
+        targets.forEach((album) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = album.name;
+          button.addEventListener("click", () => {
+            if (params.get("error") === "move") {
+              showBanner(COPY.moveError, true);
+              return;
+            }
+            state.photos = state.photos.filter((photo) => photo.id !== movingPhotoId);
+            movePanel.classList.remove("is-open");
+            render();
+          });
+          moveTargets.appendChild(button);
+        });
+      }
+      movePanel.classList.add("is-open");
+    }
+
+    function pickFiles() {
+      fileInput.click();
+    }
+
+    document.getElementById("addPhotos").addEventListener("click", pickFiles);
+    document.getElementById("addPhotosEmpty").addEventListener("click", pickFiles);
+    document.getElementById("cancelMove").addEventListener("click", () => movePanel.classList.remove("is-open"));
+
+    fileInput.addEventListener("change", () => {
+      const files = Array.from(fileInput.files || []);
+      if (files.some(isUnsupported)) {
+        showBanner(COPY.unsupported, true);
+        fileInput.value = "";
+        return;
+      }
+      files.forEach((file) => {
+        state.photos.push({
+          id: "pho_new_" + file.name + "_" + Date.now(),
+          name: file.name,
+          tone: "tone-sand"
+        });
+      });
+      banner.classList.remove("is-visible");
+      fileInput.value = "";
+      render();
+    });
+
+    if (params.get("loading") === "1") {
+      empty.classList.remove("is-visible");
+      grid.classList.add("hidden");
+      loading.classList.remove("hidden");
+    } else {
+      render();
+      if (params.get("error") === "unsupported") showBanner(COPY.unsupported, true);
+      if (params.get("error") === "upload") showBanner(COPY.uploadError, true);
+      if (params.get("error") === "move") showBanner(COPY.moveError, true);
+      if (params.get("alone") === "1" && state.photos[0]) openMove(state.photos[0].id);
+    }
+    }
+  </script>
+</body>
+</html>

@@ -1,22 +1,21 @@
-# Rule 1 - 各層必讀集合以 Scenario 與層別為準
+# Rule 1 - 各層必讀集合以本則與層別為準；已有片段不重載
 
 - Level: `MUST`
-- 每次都必須載入該 Scenario 在 `specs/<plan-package>/e2e-test-plan.md` 的區塊（Gherkin＋對應欄位）。
-- 另依 `layer` 從 `specs/<plan-package>/system-analyze/` 載入 SA 片段：
+- 必須持有該則在 `specs/<plan-package>/e2e-test-plan.md` 的區塊（Gherkin＋對應欄位）；優先用 implement 帶入的片段。
+- 另依 `layer` 從 `specs/<plan-package>/system-analyze/` 持有 SA 片段：
   - `backend`：`api-plan.md`、`DDL.md`、`data-plan.md`
   - `frontend`：`ui-plan.md`、`data-plan.md`；寫 Mock 時另加 `api-plan.md`
   - `integration`：`ui-plan.md`、`api-plan.md`、`data-plan.md`（不含 `DDL.md`）
-- 不得載入：`technical-research.md`、`spec.md`、`plan.md`、整份 `task-*.md`（受測行為已由 prompt 帶入）。
+- 已持有的檔與區塊不得再整段重開。不得載入：`technical-research.md`、`spec.md`、`plan.md`、整份 `task-*.md`（受測行為已由 prompt 帶入）。
 
 ## Good Example
 
-- 這個例子是好的，因為後端 Red 只開 e2e 該 Scenario 與點名到的 api／DDL／data 片段，且路徑在 `system-analyze/`。
+- 這個例子是好的，因為後端 Red 只用已帶的 e2e 該則與點名 api／DDL／data 片段。
 
 ```text
-layer=backend, plan-package=001-photo-albums, S-1-1
-→ specs/001-photo-albums/e2e-test-plan.md 的 S-1-1 區塊
-→ specs/.../system-analyze/api-plan.md 的 POST /albums、POST .../photos、GET ...
-→ 同目錄 DDL.md／data-plan.md 中 albums、photos 相關片段
+layer=backend, 本則=S-1-1
+→ 使用已定位的 e2e S-1-1 區塊
+→ 使用已定位的 POST /albums 契約與 albums 表片段
 ```
 
 ## Bad Example
@@ -27,27 +26,29 @@ layer=backend, plan-package=001-photo-albums, S-1-1
 每次 Red 先讀完 spec.md + technical-research.md + 整份 api-plan.md
 ```
 
-# Rule 2 - 只讀受測行為點名的介面元素，需要再補相關契約
+# Rule 2 - 只讀受測行為點名的介面元素；只走觀測通道
 
 - Level: `MUST`
 - 對 SA 檔不得整檔通讀；只讀受測行為（與 e2e 對應欄位）點名到的 endpoint、頁面、實體或其他介面元素。
+- 測試必須只打「打」、只看「看」寫明的正式介面（執行期畫面或正式 API）。
+- **禁止**把 `system-analyze/ui/*.html` 或其他雛形檔當受測物或測試入口。
 - 寫測時若斷言仍缺形狀／欄位／狀態碼等細節，可再手術式補讀**相關**契約片段；不可借機通讀無關章節。
 
 ## Good Example
 
-- 這個例子是好的，因為先讀點名 endpoint，缺 response 形狀再補該 endpoint 章節。
+- 這個例子是好的，因為觀測通道是執行期主頁，不是雛形。
 
 ```text
-受測行為點名 PATCH /photos/:id 與期望 album_id
-→ 只開 api-plan 該 endpoint
-→ 需要 body 範例時再讀同一 endpoint 的請求／回應區塊
+看：執行期主頁（不是 ui/index.html）
+→ 測試打開 Vite 執行期頁面，不斷言 system-analyze/ui/index.html
 ```
 
 ## Bad Example
 
-- 這個例子是壞的，因為「需要契約」變成整份 api-plan 從頭讀到尾。
+- 這個例子是壞的，因為把雛形當受測物，或「需要契約」變成整份 api-plan。
 
 ```text
+測試去讀 system-analyze/ui/index.html 有沒有「旅行」
 點名一個 endpoint，卻把 api-plan 全檔載入
 ```
 
@@ -63,8 +64,8 @@ layer=backend, plan-package=001-photo-albums, S-1-1
 - 這個例子是好的，因為 Then 跟 Gherkin，期望跟受測行為。
 
 ```text
-Gherkin Then：照片只在相簿 B
-受測行為：移至 B 後，A 詳情不再顯示、B 可見該照片
+Gherkin Then：主頁顯示「旅行」
+受測行為：期望主頁看得到「旅行」；還沒做時看不到「旅行」
 → 斷言對齊 Then 與受測行為期望
 ```
 

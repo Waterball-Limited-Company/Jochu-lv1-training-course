@@ -142,11 +142,31 @@ def validate_global_rules(text: str, errors: list[str]) -> None:
             errors.append("存在全域約束章節時，應包含全域邊界情境。")
 
 
+def validate_header_and_spec_changes(text: str, errors: list[str]) -> None:
+    if "**規格名稱**：" not in text:
+        errors.append("缺少 `**規格名稱**：` 表頭欄位。")
+    if "**功能分支**" in text.split("## 使用者故事與驗證", 1)[0]:
+        errors.append("表頭不得使用 `功能分支`，應改為 `規格名稱`。")
+    if "<br>" in text.split("## 使用者故事與驗證", 1)[0]:
+        errors.append("表頭不得使用 `<br>`，各欄必須分行書寫。")
+    if "**輸入需求**：" not in text:
+        errors.append("缺少 `**輸入需求**：` 表頭欄位。")
+    if "## 規格改動" not in text:
+        errors.append("缺少 `## 規格改動` 章節。")
+        return
+
+    after_changes = text.split("## 規格改動", 1)[1]
+    before_stories = after_changes.split("## 使用者故事與驗證", 1)[0]
+    if not re.search(r"^[-*] ", before_stories, re.MULTILINE):
+        errors.append("`## 規格改動` 必須至少有一條條列內容。")
+
+
 def validate_common_sections(text: str, errors: list[str]) -> None:
     if not text.startswith("# 功能規格："):
         errors.append("文件必須以 `# 功能規格：...` 開頭。")
     if "## 使用者故事與驗證 *(必填)*" not in text:
         errors.append("缺少 `## 使用者故事與驗證 *(必填)*` 章節。")
+    validate_header_and_spec_changes(text, errors)
 
     placeholders = RE_PLACEHOLDER.findall(text)
     if placeholders:

@@ -29,6 +29,7 @@ Then 回應 201 且 body 含 id
 - 每個 Scenario 的 Gherkin 區塊內，`When` 關鍵字只能出現一次，且 When 之後、Then 之前不可再出現 `And`／`But`。
 - `Given` 與 `Then` 可以用 `And` 延續多個前置或斷言。
 - 若 AC 含多個連續動作，應合併進同一條 When，或把驗證性動作寫進 Then，不可拆成 When + And。
+- `## 整合` 對準 User Story 獨立驗證，When 可以寫完整路徑，仍只能有一條 When。
 
 ## Good Example
 

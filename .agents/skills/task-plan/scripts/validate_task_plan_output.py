@@ -25,17 +25,29 @@ LAYER_FILES = {
 }
 
 US_RE = re.compile(r"^### (US-\d+)\s+.+\（優先級：P\d+\）\s*$", re.M)
-RED_VERIFY_RE = re.compile(
-    r"^\s*-\s*\[[ xX]\]\s*`?/tdd-e2e-red`?\s*—\s*"
-    r"執行本 User Story 的測試，確認本 US 的 TDD E2E Red 測試皆已實作且皆為紅燈\s*$",
-    re.M,
+US_LEVEL_RGB_HEADING_RE = re.compile(r"(?m)^#### (Red|Green|Refactor)\s*$")
+SCENARIO_HEADING_RE = re.compile(r"(?m)^#### ((?:S-\d+-\d+)|(?:US-\d+))\s+.+$")
+E2E_SCENARIO_RE = re.compile(r"^#### Scenario:\s+((?:S-\d+-\d+)|(?:US-\d+))\s+", re.M)
+RED_ITEM_RE = re.compile(
+    r"(?m)^\s*-\s*\[[ xX]\]\s*`?/tdd-e2e-red`?\s*—\s*((?:S-\d+-\d+)|(?:US-\d+))\s+"
 )
-SCENARIO_RED_ITEM_RE = re.compile(
-    r"(?m)^\s*-\s*\[[ xX]\]\s*`?/tdd-e2e-red`?\s*—\s*(S-\d+-\d+)\s+"
+GREEN_ITEM_RE = re.compile(
+    r"(?m)^\s*-\s*\[[ xX]\]\s*`?/tdd-e2e-green`?\s*—\s*((?:S-\d+-\d+)|(?:US-\d+))"
 )
-ANY_RED_ITEM_RE = re.compile(r"(?m)^\s*-\s*\[[ xX]\]\s*`?/tdd-e2e-red`?")
-E2E_SCENARIO_RE = re.compile(r"^#### Scenario:\s+(S-\d+-\d+)\s+", re.M)
+REFACTOR_ITEM_RE = re.compile(
+    r"(?m)^\s*-\s*\[[ xX]\]\s*`?/tdd-e2e-refactor`?\s*—\s*((?:S-\d+-\d+)|(?:US-\d+))"
+)
+CHECKBOX_RE = re.compile(
+    r"(?m)^\s*-\s*\[[ xX]\]\s*`?/(tdd-e2e-(?:red|green|refactor))`?"
+)
 PLACEHOLDER_RE = re.compile(r"\{\{[A-Z0-9_]+\}\}")
+FORBIDDEN_VERIFY_RE = re.compile(
+    r"確認本 US 的 TDD E2E Red 測試皆已實作且皆為紅燈"
+)
+FORBIDDEN_US_GREEN_RE = re.compile(r"讓本 US 既有 Red 全綠")
+
+RED_FIELDS = ("前置", "打", "看", "期望")
+SLICE_RED_FIELDS = RED_FIELDS + ("還沒做時",)
 
 
 def parse_args() -> argparse.Namespace:
@@ -50,20 +62,6 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def section_body(text: str, header: str) -> str:
-    parts = re.split(r"(?m)^## ", text)
-    for part in parts:
-        if part.startswith(header.lstrip("#").strip() + "\n") or part.startswith(
-            header.lstrip("#").strip() + "\r\n"
-        ):
-            return part
-        # headers in REQUIRED are like "## 1. 規格閱讀" — after split marker removed
-        title = header[3:] if header.startswith("## ") else header
-        if part.startswith(title):
-            return part
-    return ""
-
-
 def e2e_layer_scenarios(e2e_text: str, layer: str) -> list[str]:
     parts = re.split(r"(?m)^## ", e2e_text)
     body = ""
@@ -72,6 +70,64 @@ def e2e_layer_scenarios(e2e_text: str, layer: str) -> list[str]:
             body = part
             break
     return E2E_SCENARIO_RE.findall(body)
+
+
+def section_three(text: str) -> str:
+    if "## 3. User Story 實作計劃" not in text:
+        return ""
+    sec3 = text.split("## 3. User Story 實作計劃", 1)[1]
+    if "## 4." in sec3:
+        sec3 = sec3.split("## 4.", 1)[0]
+    return sec3
+
+
+def has_label(chunk: str, label: str) -> bool:
+    return f"{label}：" in chunk or f"{label}:" in chunk
+
+
+def validate_scenario_block(
+    path_name: str,
+    us_id: str,
+    heading_id: str,
+    block: str,
+    layer: str,
+) -> list[str]:
+    errors: list[str] = []
+    prefix = f"{path_name}: {us_id} {heading_id}"
+
+    red_ids = RED_ITEM_RE.findall(block)
+    green_ids = GREEN_ITEM_RE.findall(block)
+    refactor_ids = REFACTOR_ITEM_RE.findall(block)
+
+    if red_ids != [heading_id]:
+        errors.append(f"{prefix} Red ID {red_ids} != heading {heading_id}")
+    if green_ids != [heading_id]:
+        errors.append(f"{prefix} Green ID {green_ids} != heading {heading_id}")
+    if refactor_ids != [heading_id]:
+        errors.append(f"{prefix} Refactor ID {refactor_ids} != heading {heading_id}")
+
+    commands = CHECKBOX_RE.findall(block)
+    if commands != ["tdd-e2e-red", "tdd-e2e-green", "tdd-e2e-refactor"]:
+        errors.append(
+            f"{prefix} checkbox order {commands} != red → green → refactor"
+        )
+
+    if not has_label(block, "受測行為"):
+        errors.append(f"{prefix} missing nested 受測行為")
+    if not has_label(block, "實作計畫"):
+        errors.append(f"{prefix} missing nested 實作計畫")
+    if not has_label(block, "整理範圍"):
+        errors.append(f"{prefix} missing nested 整理範圍")
+
+    required_fields = SLICE_RED_FIELDS if layer in {"後端", "前端"} else RED_FIELDS
+    for field in required_fields:
+        if not has_label(block, field):
+            errors.append(f"{prefix} 受測行為 missing {field}")
+
+    if "本則不驗證" not in block:
+        errors.append(f"{prefix} Green missing 本則不驗證")
+
+    return errors
 
 
 def validate_task_file(path: Path, layer: str, expected_ids: list[str]) -> list[str]:
@@ -93,85 +149,63 @@ def validate_task_file(path: Path, layer: str, expected_ids: list[str]) -> list[
     if "完成定義" in text:
         errors.append(f"{path.name}: must not contain 完成定義")
 
-    # US blocks under section 3
-    sec3 = ""
-    if "## 3. User Story 實作計劃" in text:
-        sec3 = text.split("## 3. User Story 實作計劃", 1)[1]
-        if "## 4." in sec3:
-            sec3 = sec3.split("## 4.", 1)[0]
+    if FORBIDDEN_VERIFY_RE.search(text):
+        errors.append(f"{path.name}: must not contain US-level Red verify item")
 
+    if FORBIDDEN_US_GREEN_RE.search(text):
+        errors.append(f"{path.name}: must not contain US-level Green 讓本 US 既有 Red 全綠")
+
+    sec3 = section_three(text)
     us_matches = list(US_RE.finditer(sec3))
     if not us_matches:
         errors.append(f"{path.name}: no User Story headings under section 3")
 
+    actual_ids: list[str] = []
     for i, match in enumerate(us_matches):
         start = match.end()
         end = us_matches[i + 1].start() if i + 1 < len(us_matches) else len(sec3)
         block = sec3[start:end]
-        for sub in ("#### AC / Edge", "#### Red", "#### Green", "#### Refactor"):
-            if sub not in block:
-                errors.append(f"{path.name}: {match.group(1)} missing {sub}")
+        us_id = match.group(1)
 
-        # Green nested plan
-        if "#### Green" in block:
-            green = block.split("#### Green", 1)[1]
-            if "#### Refactor" in green:
-                green = green.split("#### Refactor", 1)[0]
-            if "/tdd-e2e-green" not in green:
-                errors.append(f"{path.name}: {match.group(1)} Green missing /tdd-e2e-green")
-            if "實作計畫：" not in green and "實作計畫:" not in green:
-                errors.append(f"{path.name}: {match.group(1)} Green missing nested 實作計畫")
+        if "#### AC / Edge" not in block:
+            errors.append(f"{path.name}: {us_id} missing #### AC / Edge")
 
-        # Red: Scenario items need nested plan; final item is fixed verify checkbox
-        if "#### Red" in block:
-            red = block.split("#### Red", 1)[1]
-            if "#### Green" in red:
-                red = red.split("#### Green", 1)[0]
-            red_item_matches = list(ANY_RED_ITEM_RE.finditer(red))
-            if not red_item_matches:
-                errors.append(f"{path.name}: {match.group(1)} Red has no /tdd-e2e-red items")
-            else:
-                last = red_item_matches[-1]
-                last_line = red[last.start() :].split("\n", 1)[0]
-                if not RED_VERIFY_RE.match(last_line):
+        rgb_headings = US_LEVEL_RGB_HEADING_RE.findall(block)
+        if rgb_headings:
+            errors.append(
+                f"{path.name}: {us_id} must not use US-level #### {', '.join(rgb_headings)}"
+            )
+
+        scenario_matches = list(SCENARIO_HEADING_RE.finditer(block))
+        if not scenario_matches:
+            errors.append(f"{path.name}: {us_id} has no Scenario heading")
+
+        for j, scenario in enumerate(scenario_matches):
+            heading_id = scenario.group(1)
+            if layer == "整合":
+                if not re.fullmatch(r"US-\d+", heading_id):
                     errors.append(
-                        f"{path.name}: {match.group(1)} Red must end with fixed "
-                        "US-level verify /tdd-e2e-red checkbox"
+                        f"{path.name}: {us_id} integration heading {heading_id} must be US-n"
                     )
-                else:
-                    verify_body = red[last.end() :]
-                    if (
-                        "受測行為：" in verify_body
-                        or "受測行為:" in verify_body
-                        or "實作計畫：" in verify_body
-                        or "實作計畫:" in verify_body
-                    ):
-                        errors.append(
-                            f"{path.name}: {match.group(1)} Red verify item "
-                            "must not nest 受測行為／實作計畫"
-                        )
-                for j, item in enumerate(red_item_matches[:-1]):
-                    chunk_end = (
-                        red_item_matches[j + 1].start()
-                        if j + 1 < len(red_item_matches)
-                        else len(red)
-                    )
-                    chunk = red[item.start() : chunk_end]
-                    if not SCENARIO_RED_ITEM_RE.match(chunk):
-                        errors.append(
-                            f"{path.name}: {match.group(1)} non-final Red item "
-                            "must be Scenario S-n-m"
-                        )
-                    if "受測行為：" not in chunk and "受測行為:" not in chunk:
-                        errors.append(
-                            f"{path.name}: {match.group(1)} a Scenario Red item "
-                            "lacks nested 受測行為"
-                        )
+            elif not re.fullmatch(r"S-\d+-\d+", heading_id):
+                errors.append(
+                    f"{path.name}: {us_id} {layer} heading {heading_id} must be S-n-m"
+                )
 
-    actual_ids = SCENARIO_RED_ITEM_RE.findall(text)
+            chunk_end = (
+                scenario_matches[j + 1].start()
+                if j + 1 < len(scenario_matches)
+                else len(block)
+            )
+            chunk = block[scenario.start() : chunk_end]
+            actual_ids.append(heading_id)
+            errors.extend(
+                validate_scenario_block(path.name, us_id, heading_id, chunk, layer)
+            )
+
     if actual_ids != expected_ids:
         errors.append(
-            f"{path.name}: Red Scenario IDs {actual_ids} != e2e ## {layer} {expected_ids}"
+            f"{path.name}: Scenario IDs {actual_ids} != e2e ## {layer} {expected_ids}"
         )
 
     return errors

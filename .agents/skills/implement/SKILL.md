@@ -1,19 +1,19 @@
 ---
 name: implement
-description: 依 specs/<plan-package>/task-plan/ 的 task 逐步實作：進場解析 package；若有 analyze-report.md 則讀取，嚴重項硬停確認後才進入範圍選單；§1／§2 親自執行；§3 的 /tdd-e2e-red|green|refactor 委派；逐步勾選 checkbox；失敗即停並回報。Use when the user invokes /implement, asks to execute task-plan implementation, or continue from unchecked task items.
+description: 依 specs/<plan-package>/task-plan/ 的 task 逐步實作：進場解析 package；若有 analyze-report.md 則讀取，嚴重項硬停確認後才進入範圍選單；§1／§2 親自執行；§3 同一輪按則跑 /tdd-e2e-red|green|refactor（一個 US 只定位一次規格，不為每格新開 Agent）；逐步勾選 checkbox；失敗即停並回報。Use when the user invokes /implement, asks to execute task-plan implementation, or continue from unchecked task items.
 disable-model-invocation: true
 ---
 
 # Implement
 
-執行 `task-plan` 產物的逐步實作編排器：解析 `plan-package`；若有 `analyze-report.md` 則讀取，有嚴重發現則硬停確認；再確認本輪層別範圍與順序後，依對應 `task-*.md` 從第一個未勾項往下做。無 skill 引用的步驟親自落地；標有 `/tdd-e2e-red`／`/tdd-e2e-green`／`/tdd-e2e-refactor` 的步驟委派並傳入契約參數。成功則勾選進度；失敗則停止並回報，保留已勾項。
+執行 `task-plan` 產物的逐步實作編排器：解析 `plan-package`；若有 `analyze-report.md` 則讀取，有嚴重發現則硬停確認；再確認本輪層別範圍與順序後，依對應 `task-*.md` 從第一個未勾項往下做。無 skill 引用的步驟親自落地；標有 `/tdd-e2e-red`／`/tdd-e2e-green`／`/tdd-e2e-refactor` 的步驟在同一輪執行對應 skill SOP，傳入本則與已定位片段。成功則勾選進度；失敗則停止並回報，保留已勾項。
 
 # SOP
 
 ## Phase 1 -- 解析 package、analyze 閘門並確認本輪範圍
 
-1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」，以及專案根目錄 `constitution.md`（若存在）。
-2. THINK 依本次已載入之憲法讀取規則處理缺檔或套用約束：缺檔則警告後繼續；有檔則萃取與本 skill 相關之規範，後續步驟／產出與憲法衝突時以憲法為準。
+1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」（若存在），以及專案根目錄 `constitution.md`（若存在）；缺檔則略過，不報錯。
+2. THINK 若已讀到憲法，萃取與本 skill 相關之 MUST，後續步驟／選型／產出與憲法衝突時改依憲法執行；若未讀到，依本 skill 預設規則繼續。
 3. READ 讀取使用者輸入與當前上下文，確認是否已帶 `plan-package` 或範圍選項。
 4. READ 讀取 `rules/進場package與範圍契約.md`，確認 package 解析與範圍選單規則。
 5. THINK 依本次已載入規則解析 `plan-package`；若零個可選 package，停止並進入 Phase 4 回報。
@@ -29,11 +29,11 @@ disable-model-invocation: true
 
 ## Phase 2 -- 依層執行 task 步驟
 
-1. READ 讀取 `rules/步驟執行與委派判準.md`、`rules/進度勾選與失敗停止判準.md`，確認親自執行／委派邊界、參數組裝、勾選與失敗停止規則。
+1. READ 讀取 `rules/步驟執行與委派判準.md`、`rules/進度勾選與失敗停止判準.md`，確認親自執行／同一輪跑 TDD 的邊界、本則參數、勾選與失敗停止規則。
 2. READ 讀取本輪下一層（或當前層）的 `specs/<plan-package>/task-plan/task-<layer>.md`，定位第一個未勾選項目。
-3. THINK 依本次已載入規則判定該步驟為「親自執行」或「委派 tdd skill」，並收斂委派時必傳參數。
+3. THINK 依本次已載入規則判定該步驟為「親自執行」或「跑 tdd skill」；若該項屬某 US 的第一格 RGB，先定位並載入該層該 US 的 e2e／相關 SA／task 區塊（本 US 唯一一次），後續同 US 格沿用已定位片段，並收斂本則必傳參數。
 4. WRITE 若為親自執行步驟：依 task 指示完成該步（含其驗證指令）。
-5. DELEGATE 若為 `/tdd-e2e-red`／`/tdd-e2e-green`／`/tdd-e2e-refactor`：依契約委派對應 skill，傳入必填欄位。
+5. DELEGATE 若為 `/tdd-e2e-red`／`/tdd-e2e-green`／`/tdd-e2e-refactor`：在同一輪執行對應 skill 的 SOP（不為該格新開 Agent），傳入本則必填欄位與已定位片段。
 6. THINK 依本次已載入規則判定該步成功或失敗。失敗則停止並進入 Phase 4 回報；成功則繼續。
 7. WRITE 成功時將該步在 `task-*.md` 的 checkbox 改為已勾選。
 8. THINK 若本層尚有未勾項，回到本 Phase 讀取／執行下一步；若本層完成且還有下一層，切換下一層並重複；若本輪所有層完成，進入 Phase 3。

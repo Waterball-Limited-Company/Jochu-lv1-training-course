@@ -12,8 +12,8 @@ disable-model-invocation: true
 
 ## Phase 1 -- 收斂 package 與輸出目錄
 
-1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」，以及專案根目錄 `constitution.md`（若存在）。
-2. THINK 依本次已載入之憲法讀取規則處理缺檔或套用約束：缺檔則警告後繼續；有檔則萃取與本 skill 相關之規範，後續步驟／產出與憲法衝突時以憲法為準。
+1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」（若存在），以及專案根目錄 `constitution.md`（若存在）；缺檔則略過，不報錯。
+2. THINK 若已讀到憲法，萃取與本 skill 相關之 MUST，後續步驟／選型／產出與憲法衝突時改依憲法執行；若未讀到，依本 skill 預設規則繼續。
 3. READ 讀取 `rules/同層skill委派判準.md`，確認下游 skill 必須從 `.agents/skills/` 同層 sibling 載入，不得從 `system-analyze/` 子目錄載入。
 4. READ 讀取使用者需求與同 package 的 `spec.md`（及既有 clarify 決策，若有），確認功能主題與 `plan-package`。
 5. THINK 若同 package 尚無 `specs/<NNN-plan-package>/spec.md`，停止後續委派，先請使用者完成 `/specify` 或指定既有 package；否則收斂目標路徑 `specs/<NNN-plan-package>/system-analyze/` 與 package 根目錄。
@@ -34,7 +34,7 @@ disable-model-invocation: true
 1. THINK 依已載入之介面推敲規則與最新 `plan.md`，收斂本次必跑／跳過的介面集合（Data 幾乎常駐；有 DB 時預期 `DDL.md`；api／ui 選填）。
 2. DELEGATE 若本次需 Data：呼叫 `/data-plan`，交付同 package 的 `spec.md`、`technical-research.md`、clarify 決策（若有）與 `plan-package`，產出 `system-analyze/data-plan.md`（若需 DB 另產 `DDL.md`）；確認必產檔存在後才進入下一步。
 3. DELEGATE 若本次需 API：呼叫 `/api-plan`，交付同 package 的 `spec.md`、`technical-research.md`、已產出之 `data-plan.md`／`DDL.md`（若有）、clarify 決策（若有）與 `plan-package`，產出 `system-analyze/api-plan.md`；確認檔案存在後才進入下一步。
-4. DELEGATE 若本次需 UI：呼叫 `/ui-plan`，交付同 package 的 `spec.md`、`technical-research.md`、已產出之 `data-plan.md`／`DDL.md`／`api-plan.md`（若有）、clarify 決策（若有）與 `plan-package`，產出 `system-analyze/ui-plan.md`；確認檔案存在。
+4. DELEGATE 若本次需 UI：呼叫 `/ui-plan`，交付同 package 的 `spec.md`、`technical-research.md`、已產出之 `data-plan.md`／`DDL.md`／`api-plan.md`（若有）、clarify 決策（若有）與 `plan-package`，產出 `system-analyze/ui-plan.md` 與 `system-analyze/ui/` 靜態雛形；確認 `ui-plan.md` 存在。
 
 ## Phase 5 -- 收尾對話與齊全檢查
 

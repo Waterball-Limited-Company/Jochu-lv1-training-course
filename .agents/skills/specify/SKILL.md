@@ -12,8 +12,8 @@ disable-model-invocation: true
 
 ## Phase 1 -- 收斂輸入與生成邊界
 
-1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」，以及專案根目錄 `constitution.md`（若存在）。
-2. THINK 依本次已載入之憲法讀取規則處理缺檔或套用約束：缺檔則警告後繼續；有檔則萃取與本 skill 相關之規範，後續步驟／產出與憲法衝突時以憲法為準。
+1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」（若存在），以及專案根目錄 `constitution.md`（若存在）；缺檔則略過，不報錯。
+2. THINK 若已讀到憲法，萃取與本 skill 相關之 MUST，後續步驟／選型／產出與憲法衝突時改依憲法執行；若未讀到，依本 skill 預設規則繼續。
 3. READ 讀取使用者需求、`NNN-plan-package` 與 `templates/spec.template.md`、`templates/spec.example.md`，確認本次要產出的 spec 結構、benchmark 風格、package 邊界，以及固定產物路徑 `/specs/<NNN-plan-package>/spec-mapping-checklist.md` 與 `/specs/<NNN-plan-package>/spec.md`。
 4. THINK 先根據已讀內容判斷本次輸入是否已足夠切分故事、約束與成功標準；若仍有會改變故事邊界、全域規則歸屬或待澄清標記的高影響缺口，準備進入澄清。
 5. DELEGATE 若高影響缺口尚未拍板，呼叫 `/clarify` 收斂 1 至 3 個最關鍵決策，收到使用者回答前停止後續 spec 生成。
@@ -29,13 +29,14 @@ disable-model-invocation: true
 
 1. READ 讀取 `rules/成功標準生成判準.md`、`rules/驗收情境與邊界情境撰寫判準.md`、`rules/待澄清標記判準.md`，確認成功標準、驗收情境、邊界情境與待澄清標記的生成方式。
 2. READ 讀取 `/specs/<NNN-plan-package>/spec-mapping-checklist.md`，確認後續 spec 擴寫只建立在已收斂的語意映射上。
-3. THINK 依本次已載入規則，逐一擴寫每個使用者故事的描述、優先級理由、獨立驗證方式、功能需求、成功標準、驗收情境與邊界情境，並另外整理共通規則、全域邊界情境、關鍵實體與假設。
-4. WRITE 依 `templates/spec.template.md` 回填完整 spec，並將最終檔案寫入 `/specs/<NNN-plan-package>/spec.md`；所有 `FR` 與 `成功標準` 都必須掛在對應的使用者故事內，只有跨故事且永遠成立的限制才可放進 `共通規則與全域約束`。
+3. READ 讀取 `rules/規格改動撰寫判準.md`，確認表頭與規格改動的寫法，以及何時必須讀取既有 spec。
+4. THINK 依本次已載入規則，逐一擴寫每個使用者故事的描述、優先級理由、獨立驗證方式、功能需求、成功標準、驗收情境與邊界情境，並另外整理共通規則、全域邊界情境、關鍵實體與假設；同時判定本次為新建或改／刪既有規格，改／刪時讀取被影響的 `specs/<資料夾名稱>/spec.md` 以收斂規格改動。
+5. WRITE 依 `templates/spec.template.md` 回填完整 spec（含規格名稱表頭、輸入需求與規格改動），並將最終檔案寫入 `/specs/<NNN-plan-package>/spec.md`；所有 `FR` 與 `成功標準` 都必須掛在對應的使用者故事內，只有跨故事且永遠成立的限制才可放進 `共通規則與全域約束`。
 
 ## Phase 4 -- 檢查一致性並修補
 
 1. READ 讀取 `rules/產出一致性檢查清單.md`，逐項檢查輸出是否覆蓋所有輸入語意、故事結構是否完整、`FR` 與 `成功標準` 是否全數正確歸屬，以及全域規則與待澄清項是否放在正確位置。
-2. DELEGATE 執行 `uv run .agents/skills/my-specify/scripts/validate_spec_output.py --package <NNN-plan-package>`，檢查 `/specs/<NNN-plan-package>/spec.md` 的章節完整性、編號連續性、placeholder 殘留與基礎格式正確性。
+2. DELEGATE 執行 `uv run .agents/skills/specify/scripts/validate_spec_output.py --package <NNN-plan-package>`，檢查 `/specs/<NNN-plan-package>/spec.md` 的章節完整性、編號連續性、placeholder 殘留與基礎格式正確性。
 3. THINK 若 checklist 或 validator 失敗，回推是語意切分、故事歸屬、成功標準、情境撰寫或樣板回填出錯，並收斂最小修補範圍。
 4. WRITE 依修補結果更新 spec；若修補後仍失敗，回到前一 phase 重建對應內容。
 

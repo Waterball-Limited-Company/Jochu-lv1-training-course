@@ -30,7 +30,7 @@ S-1-1 | 後端 Scenario | e2e-test-plan.md
 - 依實際存在的產物抽取：
   - `spec.md`：US、`USn-FRm`、AC／Edge、`GR-xxx`、關鍵實體名稱（若有）
   - `api-plan.md`：HTTP method＋path、對應 FR／US（若有追溯表）
-  - `ui-plan.md`：頁面／業務邏輯 ID 或穩定標題、對應 US／FR（若有）
+  - `ui-plan.md`：頁面／使用者故事標題、對應 US／FR（若有）
   - `data-plan.md`／`DDL.md`：實體名稱、關鍵欄位／約束名稱（足以做跨層對齊）
   - `e2e-test-plan.md`：Scenario ID（如 `S-1-1`）、對應欄位中的 US／AC／Edge／FR／API／UI、測試摘要總表列
   - `task-plan/*`：與 Scenario／US／AC／Edge 可對齊的章節或步驟標識（依各檔既有標題／編號）

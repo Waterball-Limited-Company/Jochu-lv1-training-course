@@ -3,7 +3,16 @@
 
 # 功能規格：{{FEATURE_NAME}}
 
-**功能分支**：`{{FEATURE_BRANCH}}`<br>**建立日期**：{{CREATED_DATE}}<br>**狀態**：{{STATUS}}<br>**輸入需求**：{{INPUT_REQUIREMENTS}}
+**規格名稱**：`{{SPEC_NAME}}`
+**建立日期**：{{CREATED_DATE}}
+**狀態**：{{STATUS}}
+**輸入需求**：{{INPUT_REQUIREMENTS}}
+
+## 規格改動
+
+<!-- 新建寫「無（本規格為新建）」。改／刪既有規格時，以資料夾名稱列出 US → FR → SC；編號與名稱必須對齊被改的那份 spec，可列多份。 -->
+
+- {{SPEC_CHANGE_ENTRY}}
 
 ## 使用者故事與驗證 *(必填)*
 

@@ -24,7 +24,29 @@
 
 ## 3. User Story 實作計劃
 
-{{USER_STORY_SECTIONS}}
+### {{US_ID}} {{US_TITLE}}（優先級：{{US_PRIORITY}}）
+
+#### AC / Edge
+
+{{AC_EDGE_ITEMS}}
+
+#### {{SCENARIO_ID}} {{SCENARIO_TITLE}}
+
+- [ ] `/tdd-e2e-red` — {{SCENARIO_ID}} {{SCENARIO_TITLE}}:
+  - 受測行為：
+    - 前置：{{PRECONDITION}}
+    - 打：{{HIT_SURFACE}}
+    - 看：{{OBSERVATION_CHANNEL}}
+    - 期望：{{EXPECTED_RESULT}}
+    - 還沒做時：{{RED_FAILURE}}
+- [ ] `/tdd-e2e-green` — {{SCENARIO_ID}}:
+  - 實作計畫：
+    - {{GREEN_PLAN_ITEM}}
+    - 本則不驗證：{{OUT_OF_SCOPE}}
+- [ ] `/tdd-e2e-refactor` — {{SCENARIO_ID}}:
+  - 整理範圍：
+    - {{REFACTOR_SCOPE}}
+    - 不准擴到{{OUT_OF_SCOPE}}
 
 ---
 
