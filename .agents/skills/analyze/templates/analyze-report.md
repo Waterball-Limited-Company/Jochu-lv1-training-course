@@ -16,6 +16,7 @@
 | 資料計畫 | `{{DATA_PLAN_PATH}}` | {{DATA_PLAN_STATUS}} |
 | DDL | `{{DDL_PATH}}` | {{DDL_STATUS}} |
 | API 計畫 | `{{API_PLAN_PATH}}` | {{API_PLAN_STATUS}} |
+| API 契約案例 | `{{API_CONTRACT_PATH}}` | {{API_CONTRACT_STATUS}} |
 | UI 計畫 | `{{UI_PLAN_PATH}}` | {{UI_PLAN_STATUS}} |
 | 端對端測試計畫 | `{{E2E_TEST_PLAN_PATH}}` | {{E2E_TEST_PLAN_STATUS}} |
 | 後端實作計畫 | `{{TASK_BACKEND_PATH}}` | {{TASK_BACKEND_STATUS}} |
@@ -64,6 +65,8 @@
 | 有 Scenario 的需求數 | {{METRIC_REQ_WITH_SCENARIO}} |
 | AC／Edge 總數 | {{METRIC_AC_TOTAL}} |
 | 有 Scenario 的 AC／Edge 數 | {{METRIC_AC_WITH_SCENARIO}} |
+| API 契約案例總數 | {{METRIC_API_CONTRACT_TOTAL}} |
+| 已落到必要證據來源的契約案例數 | {{METRIC_API_CONTRACT_COVERED}} |
 | 發現總數 | {{METRIC_FINDING_TOTAL}} |
 | 嚴重 | {{METRIC_CRITICAL}} |
 | 高 | {{METRIC_HIGH}} |

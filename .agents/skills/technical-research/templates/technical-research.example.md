@@ -3,6 +3,7 @@
 **功能分支**: `001-photo-albums`
 **建立日期**: 2026-07-21
 **狀態**: 草稿
+流程版本: 2
 
 ## 決策 1: 採用極簡 Web 前後端分離架構
 
@@ -69,8 +70,21 @@
   - 純檔案＋JSON／YAML：難以表達相簿—照片多對多與約束，後續 api-plan 不好對齊
   - 一照片僅屬一相簿：與現行 data-plan M:N 假設不一致，且限制照片庫再分配彈性
 
+## 決策 6: 前端瀏覽器端對端測試採用 Playwright
+
+- **Decision**: 既有專案尚無前端瀏覽器測試套件；採用 `@playwright/test` 開啟 Vite 執行期頁面。前端 Scenario 依 `api-plan.md` 建立 API Mock 並回傳契約 fixture；完全端對端驗收停用 Mock，改連真後端與測試資料庫
+- **Rationale**:
+  - 本期需要驗證檔案選擇、原生拖放、非同步 DOM 更新與重新整理後狀態，必須由真瀏覽器提供主要證據
+  - Playwright 可在同一套工具內處理瀏覽器操作、API 攔截、trace 與截圖，適合作為新 Web 專案預設
+  - 前端 Mock 與後端回應共同以 `api-plan.md` 為契約來源，完全端對端再驗證真串接
+- **Alternatives considered**:
+  - Vitest／Testing Library：適合純函式或元件輔助測試，但不能單獨證明真瀏覽器互動
+  - 手動 quickstart：不可重複執行，無法支援 Scenario 紅燈、綠燈與回歸閘門
+  - Cypress：也能覆蓋需求；本專案尚無既有投資，因此採用較適合多分頁、下載與 trace 的 Playwright
+
 ## 假設
 
 - 第一版為單機個人應用；技術選型以本機可跑、少依賴為優先
 - 決策 5 的 M:N 歸屬正文已標 NEEDS CLARIFICATION；第一版暫定允許多相簿歸屬／不強制複製原圖。若 clarify 改變規則，優先回寫對應決策，不預期改動整體架構（決策 1）
 - 決策 3 的「僅組內重排」為低風險第一版假設（未另標 NEEDS CLARIFICATION）
+- 決策 6 是新專案預設；若既有專案已有單一成熟且足夠的瀏覽器套件，應沿用既有選型而非強制替換

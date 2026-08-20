@@ -3,6 +3,7 @@
 **功能分支**: `{{PLAN_PACKAGE}}`
 **建立日期**: {{CREATED_DATE}}
 **狀態**: 草稿
+流程版本: 2
 
 ## 決策 1: {{DECISION_1_TITLE}}
 
@@ -33,4 +34,5 @@
 3. `**Decision**` 寫出所選技術或做法；可用 inline code 標關鍵字。
 4. `**Rationale**` 與 `**Alternatives considered**` 底下至少各有一條 `- ` 子項；Alternatives 每條固定寫成 `方案：不選原因`（冒號兩側皆不可空白）。
 5. `## 假設` 固定掛在檔案最下方；格式與 `spec.md` 相同，使用 `- ` 條列。高影響未決須在決策正文使用 `[NEEDS CLARIFICATION: …]`；低風險只寫本節。對上游 `spec.md` 標記與本檔暫定取捨，澄清後回寫。
+6. 本期有 Web 前端時，決策清單必須包含「前端瀏覽器端對端測試」：記錄偵測到的既有套件、最後選定套件、執行期頁面入口、前端 Scenario 的 API Mock 邊界，以及完全端對端停用 Mock 的方式。新專案未指定偏好時推薦 Playwright，但不得覆蓋足夠的既有套件。
 -->

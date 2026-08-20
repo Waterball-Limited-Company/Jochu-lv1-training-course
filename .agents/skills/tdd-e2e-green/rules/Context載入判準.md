@@ -52,7 +52,7 @@ cat 整份 api-plan.md
 
 - Level: `MUST`
 - SA 根路徑為 `specs/<plan-package>/system-analyze/`。
-- `backend`：`api-plan.md`、`DDL.md`、`data-plan.md`；`frontend`：`ui-plan.md`、`data-plan.md`（Mock 時加 `api-plan.md`）；`integration`：`ui-plan.md`、`api-plan.md`、`data-plan.md`。
+- `backend`：`api-plan.md`、`DDL.md`、`data-plan.md`；`frontend`：`ui-plan.md`、`data-plan.md`（Mock 時加 `api-plan.md`）。
 
 ## Good Example
 

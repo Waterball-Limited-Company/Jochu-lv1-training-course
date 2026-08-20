@@ -3,6 +3,7 @@
 **功能分支**: `{{PLAN_PACKAGE}}`
 **建立日期**: {{CREATED_DATE}}
 **狀態**: 草稿
+流程版本: 2
 
 ## API Schema 描述
 
@@ -47,6 +48,7 @@
 
 | 項目 | 內容 |
 | --- | --- |
+| 契約案例 | {{ENTITY_1_ENDPOINT_1_CONTRACT_IDS}} |
 | 對應 FR | {{ENTITY_1_ENDPOINT_1_FR_LINES}} |
 | 說明 | {{ENTITY_1_ENDPOINT_1_DESCRIPTION}} |
 | 設計備註 | {{ENTITY_1_ENDPOINT_1_DESIGN_NOTES}} |
@@ -65,8 +67,8 @@
 
 #### 測試規劃
 
-| 情境 | 預期 Status |
-| --- | --- |
+| 契約案例 | 情境 | 預期 Status |
+| --- | --- | --- |
 {{ENTITY_1_ENDPOINT_1_TEST_ROWS}}
 
 ---
@@ -75,10 +77,23 @@
 
 {{ADDITIONAL_ENTITY_SECTIONS}}
 
+## 可機械驗證契約
+
+以下 JSON 是前端 Mock、後端契約測試與完全端對端證據共同使用的單一契約來源。
+
+```json
+{
+  "version": 1,
+  "contracts": [
+{{CONTRACT_RECORDS}}
+  ]
+}
+```
+
 ## 追溯總表（快速 Review）
 
-| Endpoint | US | FR |
-| --- | --- |
+| Endpoint | 契約案例 | US | FR |
+| --- | --- | --- | --- |
 {{TRACEABILITY_ROWS}}
 
 ## 假設
@@ -91,7 +106,8 @@
 2. ADDITIONAL_ENTITY_SECTIONS：其餘資料實體，結構同「## 資料實體」整段（含 DDL Mapping 提示句與「欄位說明（非型別定義）」）。
 3. Parameters 無參數時填「無」；有參數時用表格：位置 / 名稱 / 必填 / 範例。
 4. Request body 無 body 時填「無」；有 body 時用 json code fence 完整貼上。
-5. Responses 每個 status 使用「##### {status}」標題，並用 json code fence 完整貼上範例（成功與錯誤皆然）。
-6. 測試規劃只列「情境名 + 預期 Status」，不寫步驟或断言。
-7. 「## 假設」格式與 spec.md 相同：檔案最下方、以 `- ` 條列。高影響未決須在 Endpoint／設計備註等正文使用 `[NEEDS CLARIFICATION: …]`；低風險只寫本節。可對齊上游 spec，並交代本檔暫定取捨。
+5. Responses 每個案例使用「##### {status} {說明} — 契約案例 {contract_id}」標題，並用 json code fence 完整貼上範例（成功與錯誤皆然）；同一個 response 標題只放一個契約案例。
+6. `{{CONTRACT_RECORDS}}`：每個 response 案例一筆合法 JSON 物件，以逗號分隔；固定包含 contract_id、user_story、required_evidence、method、path、status、request、response。request／response 使用規則允許的 JSON Schema 子集；Scenario 尚未產生，不可預猜其 ID。
+7. 測試規劃只列「契約案例 + 情境名 + 預期 Status」，不寫步驟或斷言；每一列的契約案例與 Status 必須能雙向追回 Responses 與可機械驗證契約。
+8. 「## 假設」格式與 spec.md 相同：檔案最下方、以 `- ` 條列。高影響未決須在 Endpoint／設計備註等正文使用 `[NEEDS CLARIFICATION: …]`；低風險只寫本節。
 -->

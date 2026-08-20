@@ -16,6 +16,7 @@
 | 資料計畫 | `specs/001-photo-albums/system-analyze/data-plan.md` | 存在 |
 | DDL | `specs/001-photo-albums/system-analyze/DDL.md` | 存在 |
 | API 計畫 | `specs/001-photo-albums/system-analyze/api-plan.md` | 存在 |
+| API 契約案例 | `specs/001-photo-albums/system-analyze/api-plan.md#可機械驗證契約` | 存在 |
 | UI 計畫 | `specs/001-photo-albums/system-analyze/ui-plan.md` | 存在 |
 | 端對端測試計畫 | `specs/001-photo-albums/e2e-test-plan.md` | 存在 |
 | 後端實作計畫 | `specs/001-photo-albums/task-plan/task-backend.md` | 存在 |
@@ -66,6 +67,8 @@
 | 有 Scenario 的需求數 | 11 |
 | AC／Edge 總數 | 15 |
 | 有 Scenario 的 AC／Edge 數 | 15 |
+| API 契約案例總數 | 8 |
+| 已落到必要證據來源的契約案例數 | 8 |
 | 發現總數 | 2 |
 | 嚴重 | 0 |
 | 高 | 1 |

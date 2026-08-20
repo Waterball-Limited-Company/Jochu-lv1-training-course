@@ -1,9 +1,10 @@
 # 實作計畫（{{LAYER_LABEL}}）：{{FEATURE_NAME}}
 
-**功能分支**: `{{PLAN_PACKAGE}}`  
-**建立日期**: {{CREATED_DATE}}  
-**狀態**: 草稿  
-**範圍**: {{INTEGRATION_SCOPE}}
+流程版本: 2
+功能分支: `{{PLAN_PACKAGE}}`
+建立日期: {{CREATED_DATE}}
+狀態: 草稿
+範圍: {{INTEGRATION_SCOPE}}
 
 ---
 
@@ -31,29 +32,30 @@
 
 {{AC_EDGE_ITEMS}}
 
-#### {{SCENARIO_ID}} {{SCENARIO_TITLE}}
+#### {{US_ID}} {{SCENARIO_TITLE}}
 
-- [ ] `/tdd-e2e-red` — {{SCENARIO_ID}} {{SCENARIO_TITLE}}:
-  - 受測行為：
-    - 前置：{{PRECONDITION}}
-    - 打：{{HIT_SURFACE}}
-    - 看：{{OBSERVATION_CHANNEL}}
-    - 期望：{{EXPECTED_RESULT}}
-- [ ] `/tdd-e2e-green` — {{SCENARIO_ID}}:
-  - 實作計畫：
-    - {{GREEN_PLAN_ITEM}}
-    - 本則不驗證：{{OUT_OF_SCOPE}}
-- [ ] `/tdd-e2e-refactor` — {{SCENARIO_ID}}:
-  - 整理範圍：
-    - {{REFACTOR_SCOPE}}
-    - 不准擴到{{OUT_OF_SCOPE}}
+- [ ] `User Story 完全端對端驗收` — {{US_ID}}:
+  - 前置閘門：後端與前端的 {{US_ID}} 完成閘門皆已通過
+  - Mock：停用
+  - 前端：真實執行期頁面
+  - API：正式 API
+  - 後端：真實後端
+  - 資料：{{RESETTABLE_TEST_DATA_COMMAND}}
+  - 執行：{{FULL_E2E_COMMAND}}
+  - 觀測：{{OBSERVATION_CHANNEL}}
+  - 期望：{{EXPECTED_RESULT}}
+  - 契約案例：{{CONTRACT_IDS}}
+  - 契約證據：{{INTEGRATION_CONTRACT_EVIDENCE_COMMAND}}
+  - 失敗路由：行為缺口回到對應層 Scenario；契約不一致依 api-plan.md 判定漂移方；接線或環境缺口留在整合驗收修復
+
+{{ADDITIONAL_US_BLOCKS}}
 
 ---
 
 ## 4. 進度總覽
 
-| User Story | Scenario | Red | Green | Refactor |
-| --- | --- | --- | --- | --- |
+| User Story | 完全端對端驗收 |
+| --- | --- |
 {{PROGRESS_TABLE_ROWS}}
 
 ---

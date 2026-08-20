@@ -1,12 +1,12 @@
 ---
 name: task-plan
-description: 依同 package 的 e2e-test-plan、plan.md 與 system-analyze（technical-research／DDL／api-plan／ui-plan 依層），產出從零到完的 step-by-step 實作計畫（環境建立＋各 US 的 AC／Edge＋每則 Scenario 一區塊 RGB：Red 巢狀受測行為／Green 巢狀實作計畫／Refactor 巢狀整理範圍），寫入 specs/<NNN-plan-package>/task-plan/ 的 task-backend.md、task-frontend.md、task-integration.md。Use when the user invokes /task-plan, asks for 實作計畫／Task plan after e2e-test-plan is ready, or needs layered TDD R-G-R implementation plans from specs.
+description: 依 e2e-test-plan、plan.md 與 system-analyze 產出三份實作計畫：後端／前端以 Scenario 為 TDD 顆粒度，由同一代理跑完 Red、Green、Refactor 與 User Story 層內全綠；整合以 User Story 跑完全端對端驗收，不假造 TDD Red。Use when the user invokes /task-plan, asks for 實作計畫／Task plan after e2e-test-plan is ready, or needs layered TDD and integration acceptance plans from specs.
 disable-model-invocation: true
 ---
 
 # Task Plan
 
-依同 package 的 `e2e-test-plan.md`、`plan.md`、`system-analyze/technical-research.md`、`system-analyze/DDL.md`、`system-analyze/api-plan.md`、`system-analyze/ui-plan.md`（依層取用），產出可給 implement 從零執行的實作計畫：規格閱讀、環境建立、各 User Story 的 AC／Edge，以及每則 Scenario（整合為每則 `US-n`）各自一區塊 Red → Green → Refactor。寫入 `specs/<NNN-plan-package>/task-plan/task-backend.md`、`task-frontend.md`、`task-integration.md`。
+依同 package 的 `e2e-test-plan.md`、`plan.md` 與 `system-analyze/` 產物，保留三份 task 檔。後端／前端每則 `S-n-m` 各自一區塊 Red → Green → Refactor → User Story 層內全綠，並在故事邊界跑整層回歸；整合每則 `US-n` 只做停用 Mock 的完全端對端驗收與失敗路由。
 
 # SOP
 
@@ -21,8 +21,8 @@ disable-model-invocation: true
 
 ## Phase 2 -- 依層展開實作計畫內容
 
-1. READ 讀取 `rules/產物結構與章節判準.md`、`rules/實作意圖撰寫判準.md`，確認章節階層、一則一區塊 RGB，以及 Red「受測行為」／Green「實作計畫」／Refactor「整理範圍」寫法。
-2. THINK 依本次已載入規則，分別收斂後端／前端／整合：規格閱讀清單、環境建立步驟、各 US 的 AC／Edge、每則 Scenario（整合為每則 `US-n`）各自一區塊 Red（巢狀受測行為）→ Green（巢狀實作計畫，含本則不驗證）→ Refactor（巢狀整理範圍）、進度總覽與假設；Scenario 集合對齊 `e2e-test-plan.md` 對應 `##` 區塊。
+1. READ 讀取 `rules/產物結構與章節判準.md`、`rules/實作意圖撰寫判準.md`，確認後端／前端 Scenario 代理區塊、故事閘門、整合驗收區塊與三層環境建立方式。
+2. THINK 依本次已載入規則，分別收斂後端／前端的 Scenario Red、Green、Refactor、故事累積測試、契約證據與故事邊界回歸；前端環境必須使用 plan 已選的瀏覽器套件。整合則收斂每則 `US-n` 的真串接前置、完整路徑、觀測、契約證據與失敗回送，不產出 TDD 三階段。
 
 ## Phase 3 -- 寫出三份 task
 
@@ -31,5 +31,10 @@ disable-model-invocation: true
 
 ## Phase 4 -- 驗證與修正
 
-1. DELEGATE 若需要檢查三檔是否符合一則一區塊 RGB 與 e2e 對齊，執行 `uv run .agents/skills/task-plan/scripts/validate_task_plan_output.py --package specs/<NNN-plan-package>`，確認三檔存在、必要章節、每則 Scenario（整合 `US-n`）皆有 Red／Green／Refactor、無 US 級 `#### Red` 與驗紅項，以及 ID 集合與 `e2e-test-plan.md` 各層對齊；再用腳本結果接回修正。
-2. READ 回頭檢查最終產物是否符合本次已載入規則；若不符合，立即修正。
+1. DELEGATE 執行 `uv run .agents/skills/task-plan/scripts/validate_task_plan_output.py --package specs/<NNN-plan-package>`，確認三檔存在、後端／前端每則 Scenario 有連續三階段與層內全綠閘門、每個故事有整層回歸、整合只有完全端對端驗收且無 TDD 三階段，以及 ID 集合與 `e2e-test-plan.md` 各層對齊。
+2. DELEGATE 無條件執行 `uv run .agents/skills/task-plan/scripts/validate_api_contract_references.py --package specs/<NNN-plan-package>`；腳本自行依 package 是否存在可機械驗證契約判斷新舊流程，確認版本不可降級、三份 task 逐 Scenario 引用的契約案例存在且必要證據來源都有落點。沒有 `api-plan.md` 的非 API package 由腳本安全略過契約檢查。
+3. READ 回頭檢查最終產物是否符合本次已載入規則；若不符合，立即修正。
+
+## Phase 5 -- 收尾
+
+1. WRITE 回報三份 task 路徑、Scenario 代理區塊數、User Story 完成閘門數與整合驗收數；下一步固定指向 `/analyze`，不可直接跳到 `/implement`。

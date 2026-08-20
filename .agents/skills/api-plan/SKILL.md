@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # API Plan
 
-將同 package 的 `spec.md`、`technical-research.md`（與可選的 `data-plan.md`、`DDL.md`、clarify 決策）整理成可 Review 的 REST API Schema：以資料實體切分、實體對齊 US、Endpoint 對齊 FR；實體只寫欄位形狀與範例（型別與必填歸 data-plan；關聯／schema 歸 DDL.md）；Request／Response 完整展開；測試規劃只列情境名與預期 Status。
+將同 package 的 `spec.md`、`technical-research.md`（與可選的 `data-plan.md`、`DDL.md`、clarify 決策）整理成可 Review 的 REST API Schema：以資料實體切分、實體對齊 US、Endpoint 對齊 FR；Request／Response 完整展開；測試規劃只列契約案例、情境名與預期 Status。同一份 `api-plan.md` 另保存可機械解析的契約案例，作為前端 Mock、後端契約測試與完全端對端證據的單一來源。
 
 # SOP
 
@@ -28,8 +28,8 @@ disable-model-invocation: true
 
 ## Phase 3 -- 收斂實體與 Endpoint 設計
 
-1. READ 讀取 `rules/實體形狀與對齊判準.md` 與 `rules/Endpoint契約展開判準.md`，確認實體／US／形狀／DDL 邊界，以及 Endpoint／FR／Request-Response／測試規劃寫法。
-2. THINK 依本次已載入規則，把 FR 映射到 Endpoint、把實體對齊 US，並收斂共通錯誤格式、設計備註與追溯關係；API 風格與執行環境須對齊 technical-research。
+1. READ 讀取 `rules/實體形狀與對齊判準.md`、`rules/Endpoint契約展開判準.md` 與 `rules/可機械驗證契約判準.md`，確認實體／US／形狀／DDL 邊界、Endpoint 展開方式與結構化契約案例格式。
+2. THINK 依本次已載入規則，把 FR 映射到 Endpoint、把實體對齊 US，並為每個人工 Responses 與測試規劃案例配置穩定契約案例 ID、method、path、status、request schema、response schema、User Story 與必要證據來源；人工案例與機械契約必須雙向覆蓋。API 風格與執行環境須對齊 technical-research。Scenario 尚未產生，不在本階段預猜其 ID。
 
 ## Phase 4 -- 寫出 api-plan
 
@@ -38,5 +38,5 @@ disable-model-invocation: true
 
 ## Phase 5 -- 驗證結構與修正
 
-1. DELEGATE 執行 `uv run .agents/skills/api-plan/scripts/validate_api_plan_output.py --input specs/<NNN-plan-package>/system-analyze/api-plan.md`，檢查必要章節、實體與 Endpoint 結構是否完整。
-2. READ 回頭檢查最終 api-plan 是否符合本次已載入規則：實體對齊 US、Endpoint 對齊 FR、形狀不含型別定義、Request／Response 完整展開、測試僅情境加 Status、檔末 `## 假設` 章節存在、高影響未決已用 `[NEEDS CLARIFICATION]`（若有）、且不與 technical-research 主選型矛盾；若不符合，立即修正。
+1. DELEGATE 執行 `uv run .agents/skills/api-plan/scripts/validate_api_plan_output.py --input specs/<NNN-plan-package>/system-analyze/api-plan.md`，檢查必要章節、實體、Endpoint 與可機械驗證契約是否完整且互相一致。
+2. READ 回頭檢查最終 api-plan 是否符合本次已載入規則：實體對齊 US、Endpoint 對齊 FR、Request／Response 完整展開、人工 Responses／測試規劃與結構化契約雙向覆蓋、結構化契約具備固定欄位與證據責任且沒有空 Schema、測試僅契約案例加情境與 Status、檔末 `## 假設` 存在，且不與 technical-research 主選型矛盾；若不符合，立即修正。

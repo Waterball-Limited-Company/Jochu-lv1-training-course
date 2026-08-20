@@ -1,12 +1,12 @@
 ---
 name: tdd-e2e-green
-description: 由 implement 在同一輪呼叫：依 layer、plan-package、單一 Scenario（整合可為 US-n）與該格 Green 實作計畫，優先使用已定位片段，做 just enough 程式碼讓本則變綠；跑該層全套測試，不弄紅既有綠燈，遵守本則不驗證。Use when implement invokes /tdd-e2e-green, or when executing a task-plan Green checkbox for one Scenario.
+description: 由完成合格 Red 的同一位後端或前端 Scenario Agent 呼叫：沿用 Red 的實際失敗與已定位片段，只做讓單一 Scenario 通過的最少 Green，並守住既有綠燈；成功後在同一代理脈絡接續 Refactor。整合驗收不得使用本 skill。
 disable-model-invocation: true
 ---
 
 # TDD E2E Green
 
-由 `/implement` 在同一輪呼叫。一次針對**一個 Scenario**（整合為一個 `US-n`）：依該格 Green 實作計畫做 just enough 程式碼實作，讓本則紅測變綠；執行該層全部測試，確認本則變綠且不弄紅本層先前已綠的測。禁止以「一次實作讓本 US 多支變綠」當策略；附帶變綠可回報。遵守該格「本則不驗證」。不代勾 `task-*.md` checkbox。
+由剛完成 Red 的同一 Scenario Agent 呼叫，只接受 `backend` 或 `frontend` 的單一 `S-n-m`。沿用 Red 證據做 just enough 程式碼，讓本則變綠並守住既有綠燈；成功後在同一代理脈絡接續 `/tdd-e2e-refactor`。禁止以一次做完整 User Story 為策略，整合驗收不得使用本 skill。
 
 # SOP
 
@@ -14,7 +14,7 @@ disable-model-invocation: true
 
 1. READ 讀取 `.agents/skills/constitution/` 內 RuleFile「交付skill讀取憲法判準.md」（若存在），以及專案根目錄 `constitution.md`（若存在）；缺檔則略過，不報錯。
 2. THINK 若已讀到憲法，萃取與本 skill 相關之 MUST，後續步驟／選型／產出與憲法衝突時改依憲法執行；若未讀到，依本 skill 預設規則繼續。
-3. READ 讀取 implement 帶入的 `layer`、`plan-package`、本則 ID／標題、Green 實作計畫，以及已定位片段（若有）。
+3. READ 讀取 Scenario Agent 帶入的 `scenario-agent-id`、`layer`、`plan-package`、`user-story`、本則 ID／標題、Green 實作計畫、Red 證據與已定位片段。
 4. READ 讀取 `rules/呼叫輸入與Scenario範圍契約.md`，確認必填欄位與單則邊界。
 5. THINK 依本次已載入規則校驗輸入；若不通過，停止並進入 Phase 4 回報。
 6. READ 依本次已載入規則，確認本則對應的既有 Red 測檔可定位；無法鎖定本則則進入 Phase 4 回報。
@@ -36,7 +36,7 @@ disable-model-invocation: true
 7. DELEGATE 執行該層全套測試。
 8. THINK 依本次已載入規則判定本則是否已綠、既有綠是否仍綠；未過則回到本 Phase 繼續，或進入 Phase 4 回報失敗。本則已綠則進入 Phase 4 成功回報。
 
-## Phase 4 -- 回報 implement
+## Phase 4 -- 回報 Scenario Agent
 
 1. READ 讀取 `rules/回報與環境洞交接.md`，確認成功／失敗回報欄位。
-2. WRITE 依本次已載入規則，向 implement 回報本次結果。
+2. WRITE 依本次已載入規則，向同一 Scenario Agent 回報本次結果；成功則接續 Refactor，失敗則停止該 Scenario。

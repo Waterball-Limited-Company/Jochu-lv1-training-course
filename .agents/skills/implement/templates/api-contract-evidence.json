@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "source": "{{EVIDENCE_SOURCE}}",
+  "producer": {
+    "command": "{{TEST_COMMAND}}",
+    "generated_at": "{{GENERATED_AT}}"
+  },
+  "records": [
+    {
+      "contract_id": "{{CONTRACT_ID}}",
+      "scenario_id": "{{SCENARIO_ID}}",
+      "method": "{{METHOD}}",
+      "path": "{{ACTUAL_PATH}}",
+      "status": {{STATUS_CODE}},
+      "request": {{REQUEST_JSON}},
+      "response": {{RESPONSE_JSON}}
+    }
+  ]
+}

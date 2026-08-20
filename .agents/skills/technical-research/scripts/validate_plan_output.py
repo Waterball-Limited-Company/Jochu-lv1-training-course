@@ -16,6 +16,7 @@ TITLE_RE = re.compile(r"^# 系統分析：.+$")
 BRANCH_RE = re.compile(r"^\*\*功能分支\*\*:\s*`[^`]+`$")
 CREATED_DATE_RE = re.compile(r"^\*\*建立日期\*\*:\s*\d{4}-\d{2}-\d{2}$")
 STATUS_RE = re.compile(r"^\*\*狀態\*\*:\s*.+$")
+FLOW_VERSION_RE = re.compile(r"^流程版本:\s*2$")
 
 REQUIRED_TOP_LEVEL = (
     "## 摘要",
@@ -52,6 +53,11 @@ def parse_args() -> argparse.Namespace:
         description="Validate the structure of a plan.md Markdown artifact."
     )
     parser.add_argument("--input", required=True, help="Path to the plan.md file")
+    parser.add_argument(
+        "--require-v2",
+        action="store_true",
+        help="Require flow version 2 even if the document marker was removed",
+    )
     return parser.parse_args()
 
 
@@ -236,7 +242,7 @@ def validate_project_structure(lines: list[str]) -> list[str]:
     return errors
 
 
-def validate(path: Path) -> list[str]:
+def validate(path: Path, *, require_v2: bool = False) -> list[str]:
     text = path.read_text(encoding="utf-8")
     lines = text.splitlines()
     errors: list[str] = []
@@ -249,6 +255,20 @@ def validate(path: Path) -> list[str]:
     errors.extend(validate_summary(lines))
     errors.extend(validate_tech_background(lines))
     errors.extend(validate_project_structure(lines))
+    has_v2_marker = any(FLOW_VERSION_RE.match(line.strip()) for line in lines[:12])
+    if require_v2 and not has_v2_marker:
+        errors.append("流程版本 2: missing `流程版本: 2` marker")
+    if has_v2_marker or require_v2:
+        frontend_marker = "前端瀏覽器端對端："
+        frontend_not_applicable = re.search(
+            r"前端瀏覽器端對端[：:].{0,80}不適用", text
+        )
+        if frontend_marker not in text:
+            errors.append("流程版本 2: ### 測試環境必須記錄前端瀏覽器端對端套件或明列不適用")
+        elif not frontend_not_applicable and (
+            "API" not in text or "Mock" not in text or "停用" not in text
+        ):
+            errors.append("流程版本 2: plan 必須交代前端 API Mock 與完全端對端停用 Mock")
     return errors
 
 
@@ -259,7 +279,7 @@ def main() -> int:
         print(f"Input not found: {path}", file=sys.stderr)
         return 2
 
-    errors = validate(path)
+    errors = validate(path, require_v2=args.require_v2)
     if errors:
         print(f"FAIL: {path}", file=sys.stderr)
         for error in errors:

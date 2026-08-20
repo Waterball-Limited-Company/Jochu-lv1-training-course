@@ -81,7 +81,7 @@
 # Rule 3 - 成功與錯誤的 Request／Response 必須完整貼上 JSON
 
 - Level: `MUST`
-- 每個會回傳的 status 都必須有 `##### {status}` 標題，並完整貼上 JSON 範例（成功與錯誤皆然）。
+- 每個會回傳的案例都必須有 `##### {status} {說明} — 契約案例 {contract_id}` 標題，並完整貼上 JSON 範例（成功與錯誤皆然）；一個標題只對應一個契約案例。
 - 第一版不採用「只引用實體名、僅展開差異」的縮寫策略。
 - Parameters 無參數、Request body 無 body 時填「無」；有內容時分別用參數表與 json code fence。
 
@@ -92,13 +92,13 @@
 ````md
 #### Responses
 
-##### 201 Created
+##### 201 Created — 契約案例 API-001-C1
 
 ```json
 { "id": "alb_...", "name": "旅行" }
 ```
 
-##### 400 Bad Request
+##### 400 Bad Request — 契約案例 API-001-C2
 
 ```json
 { "error": { "code": "VALIDATION_ERROR", "message": "name is required", "details": [] } }
@@ -115,10 +115,11 @@
 - 其他錯誤略
 ```
 
-# Rule 4 - 測試規劃只列情境名與預期 Status
+# Rule 4 - 測試規劃只列契約案例、情境名與預期 Status
 
 - Level: `MUST`
-- 每個 Endpoint 的「測試規劃」表只含「情境」與「預期 Status」兩欄。
+- 每個 Endpoint 的「測試規劃」表只含「契約案例」、「情境」與「預期 Status」三欄。
+- 每列只能放一個契約案例 ID，且契約案例與 Status 必須對到同 Endpoint 的 Responses 標題與可機械驗證契約；三者必須雙向覆蓋。
 - 不可在此寫步驟、断言、fixture 流程或 E2E 腳本細節；那些留給後續測試計劃 skill。
 - 至少覆蓋主要成功路徑與關鍵錯誤路徑。
 
@@ -127,10 +128,10 @@
 - 這個例子是好的，因為粒度剛好銜接 E2E 計劃。
 
 ```md
-| 情境 | 預期 Status |
-| --- | --- |
-| 建立成功 | 201 |
-| 缺 name | 400 |
+| 契約案例 | 情境 | 預期 Status |
+| --- | --- | --- |
+| API-001-C1 | 建立成功 | 201 |
+| API-001-C2 | 缺 name | 400 |
 ```
 
 ## Bad Example

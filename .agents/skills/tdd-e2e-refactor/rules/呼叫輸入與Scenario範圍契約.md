@@ -1,49 +1,38 @@
-# Rule 1 - 呼叫時必須帶齊本則必填欄位
+# Rule 1 - Refactor 必須承接同一代理的 Green 證據
 
 - Level: `MUST`
-- implement 呼叫 `/tdd-e2e-refactor` 時必須顯式提供：`layer`、`plan-package`（僅目錄名，不含 `specs/`）、本則 ID／標題、該格「整理範圍」。
-- 本則 ID：後端／前端為 `S-n-m`；整合為 `US-n`。不可改傳整個 User Story 當工作範圍。
-- 缺少必填欄位時必須停止並回報。
+- Scenario Agent 呼叫 `/tdd-e2e-refactor` 時必須提供：與 Red、Green 相同的 `scenario-agent-id`、`layer`（僅 `backend`／`frontend`）、`plan-package`、`user-story`、本則 `S-n-m` ID／標題、Green 全綠證據與整理範圍。
+- 缺 Green 證據、代理識別不同或 `layer=integration` 時停止。
 
 ## Good Example
 
-- 這個例子是好的，因為本則與整理範圍齊備。
-
 ```text
-layer: frontend
-plan-package: 001-photo-albums
+scenario-agent-id: frontend-US-1-S-1-1
 本則: S-1-1
-整理範圍: 在綠燈下整理剛寫的建立表單／POST /albums 命名與去重；不准擴到批次匯入
+Green: 本則與既有綠燈通過
+整理範圍: 去重建立表單的 request 組裝
 ```
 
 ## Bad Example
 
-- 這個例子是壞的，因為未指定本則與範圍就開始大範圍重構。
-
 ```text
-US: US-1
-把 frontend 全部重構一遍
+另開一位代理，沒有 Green 證據就重寫整個前端
 ```
 
-# Rule 2 - 一次呼叫只處理一個 Scenario
+# Rule 2 - 一次只重構一個 Scenario
 
 - Level: `MUST`
-- 一次呼叫只整理本則「整理範圍」點名的程式與測試；不可借機做同 US 下一則或跨 US 大重構。
-- 在該則 Green 之後立刻執行，不必等本 US 其他則全綠。
+- 只整理本則點名的程式與測試；不可借機做同 User Story 下一則、跨故事重寫或擴充需求。
+- 完成後回同一 Scenario Agent 執行 User Story 層內全綠閘門。
 
 ## Good Example
 
-- 這個例子是好的，因為鎖在 S-1-1 剛綠的建立表單。
-
 ```text
-S-1-1 剛綠 → 只整理建立表單／POST /albums
+S-1-1 剛綠 → 只整理 S-1-1 新增路徑 → 接著跑層內全綠
 ```
 
 ## Bad Example
 
-- 這個例子是壞的，因為等 US-1 全綠才重構，或順便整理 S-1-6。
-
 ```text
-等 S-1-1～S-1-6 全綠後一次 Refactor
-S-1-1 refactor 順便改加入照片
+重構時順便完成尚未 Red 的批次匯入
 ```

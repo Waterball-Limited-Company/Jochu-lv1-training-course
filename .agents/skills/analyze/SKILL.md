@@ -1,6 +1,6 @@
 ---
 name: analyze
-description: 在 task-plan 完成後，對同 package 的 spec、系統介面合約、e2e-test-plan 與 task-plan 做唯讀跨產物覆蓋與一致性分析，產出 package 根目錄 analyze-report.md；不修改來源規格。Use when the user invokes /analyze, asks for 規格一致性分析 / cross-artifact analysis after task-plan, or needs an implementation gate report before /implement.
+description: 在 task-plan 完成後，對同 package 的 spec、可機械驗證 API 契約、e2e-test-plan 與 task-plan 做唯讀跨產物覆蓋與一致性分析，產出 package 根目錄 analyze-report.md；不修改來源規格。Use when the user invokes /analyze, asks for 規格一致性分析 / cross-artifact analysis after task-plan, or needs an implementation gate report before /implement.
 disable-model-invocation: true
 ---
 
@@ -22,12 +22,13 @@ disable-model-invocation: true
 ## Phase 2 -- 建立 inventory
 
 1. READ 讀取 `rules/Inventory抽取判準.md`，以及 Phase 1 判定存在的 `spec.md`、`plan.md`、`system-analyze/` 介面檔、`e2e-test-plan.md`、`task-plan/` 各檔。
-2. THINK 依本次已載入規則，只抽出穩定 ID 與短摘要，建立內部 inventory（需求／介面／Scenario／Task）；不把原文整份倒入報告。
+2. THINK 依本次已載入規則，只抽出穩定 ID 與短摘要，建立內部 inventory（需求／介面／API 契約案例／Scenario／Task）；不把原文整份倒入報告。
 
 ## Phase 3 -- 依比對軸偵測
 
 1. READ 讀取 `rules/比對軸與嚴重程度判準.md`。
-2. THINK 依本次已載入規則，對 inventory 執行覆蓋與跨層一致性偵測，指派嚴重程度、穩定發現編號，並收斂覆蓋矩陣與指標；品質類（模糊詞／重複）不做或僅極輕量。
+2. RUN 無條件執行 `uv run .agents/skills/analyze/scripts/validate_api_contract_references.py --package specs/<plan-package>`；腳本自行辨識無 API、舊流程與流程版本 2。若存在可機械驗證契約卻缺版本標記，或跨產物引用失敗，直接納入跨層一致性發現，不得略過。
+3. THINK 依本次已載入規則，對 inventory 執行覆蓋與跨層一致性偵測，指派嚴重程度、穩定發現編號，並收斂覆蓋矩陣與指標；品質類（模糊詞／重複）不做或僅極輕量。
 
 ## Phase 4 -- 寫出分析報告
 

@@ -12,6 +12,7 @@ from pathlib import Path
 
 PLACEHOLDER_RE = re.compile(r"\{\{[A-Z0-9_]+\}\}")
 TITLE_RE = re.compile(r"^# 端對端測試計畫：.+$")
+FLOW_VERSION_RE = re.compile(r"^流程版本:\s*2$")
 PROOF_BLOCK_RE = re.compile(r"^## (後端|前端|整合)\s*$")
 US_HEADING_RE = re.compile(r"^### US-\d+\s+.+\（優先級：P\d+\）\s*$")
 SCENARIO_HEADING_RE = re.compile(r"^#### Scenario:\s+(S-\d+-\d+|US-\d+)\s+.+$")
@@ -21,6 +22,23 @@ BLOCK_TAG_IN_SCENARIO_RE = re.compile(
 GHERKIN_FENCE_RE = re.compile(r"^```gherkin\s*$")
 API_PATH_RE = re.compile(r"\b(GET|POST|PUT|PATCH|DELETE)\s+/|`/[a-zA-Z0-9_{}/-]+`")
 MAPPING_LABEL_RE = re.compile(r"^\s*-\s*\*\*(.+?)\*\*\s*$")
+MOCK_CONTRADICTION_RE = re.compile(
+    r"(?i)(?:"
+    r"(?:不(?:需要|必須|會|要|需|予以)?|未|無法|無須|毋須|不用|免(?:於)?)\s*(?:停用|關閉|移除)[^\n]{0,40}mock"
+    r"|mock[^\n]{0,30}(?:不(?:需要|必須|會|要|需|予以)?|未|無法|無須|毋須|不用|免(?:於)?)\s*(?:停用|關閉|移除)"
+    r"|(?:仍(?:然)?|繼續)\s*(?:保留|使用|啟用|開啟)?[^\n]{0,30}mock"
+    r"|mock[^\n]{0,30}(?:仍(?:然)?|繼續)\s*(?:保留|使用|啟用|開啟)"
+    r"|mock[^\n]{0,20}(?:保持|維持)\s*(?:啟用|開啟|使用)"
+    r"|(?<!不)(?<!未)(?<!不會)(?<!不再)(?<!無須)(?<!毋須)(?:沿用|啟用|開啟)\s*(?:既有|原有)?[^\n]{0,20}mock"
+    r"|mock[^\n]{0,20}(?<!不)(?<!未)(?<!不會)(?<!不再)(?<!無須)(?<!毋須)(?:沿用|啟用|開啟)"
+    r")"
+)
+MOCK_SAFE_NEGATION_RE = re.compile(
+    r"(?i)(?:"
+    r"(?:不(?:會|再|會再|會重新|再重新)?|未|無須|毋須|絕不)\s*(?:再(?:次)?|重新)?\s*(?:沿用|保留|使用|啟用|開啟)\s*(?:api\s*)?mock"
+    r"|(?:api\s*)?mock[^\n]{0,16}(?:不(?:會|再|會再|會重新|再重新)?|未|無須|毋須|絕不)\s*(?:再(?:次)?|重新)?\s*(?:沿用|保留|使用|啟用|開啟)"
+    r")"
+)
 
 REQUIRED_METADATA = [
     re.compile(r"^\*\*功能分支\*\*:\s*.+$"),
@@ -37,7 +55,7 @@ REQUIRED_SECTIONS = [
     "## 假設",
 ]
 
-REQUIRED_MAPPING_BY_BLOCK = {
+BASE_REQUIRED_MAPPING_BY_BLOCK = {
     "後端": (
         "US",
         "AC / Edge",
@@ -75,6 +93,12 @@ REQUIRED_MAPPING_BY_BLOCK = {
     ),
 }
 
+V2_REQUIRED_MAPPING_BY_BLOCK = {
+    "後端": ("API 契約案例",),
+    "前端": ("API", "API 契約案例"),
+    "整合": ("Mock", "API", "API 契約案例"),
+}
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -85,7 +109,17 @@ def parse_args() -> argparse.Namespace:
         required=True,
         help="Path to the e2e-test-plan.md file",
     )
+    parser.add_argument(
+        "--require-v2",
+        action="store_true",
+        help="Require flow version 2 even if the document marker was removed",
+    )
     return parser.parse_args()
+
+
+def has_mock_contradiction(text: str) -> bool:
+    without_safe_negations = MOCK_SAFE_NEGATION_RE.sub("", text)
+    return MOCK_CONTRADICTION_RE.search(without_safe_negations) is not None
 
 
 def extract_gherkin_blocks(lines: list[str]) -> list[list[str]]:
@@ -154,7 +188,42 @@ def current_proof_block(lines: list[str], index: int) -> str | None:
     return None
 
 
-def validate_scenarios(lines: list[str]) -> list[str]:
+def current_user_story(lines: list[str], index: int) -> str | None:
+    for i in range(index, -1, -1):
+        stripped = lines[i].strip()
+        match = re.match(r"^### (US-\d+)\s+", stripped)
+        if match:
+            return match.group(1)
+        if stripped.startswith("## "):
+            return None
+    return None
+
+
+def scenario_user_story(scenario_id: str) -> str:
+    if scenario_id.startswith("US-"):
+        return scenario_id
+    return f"US-{scenario_id.split('-')[1]}"
+
+
+def mapping_values(section: list[str], label: str) -> list[str]:
+    marker = f"- **{label}**"
+    for index, line in enumerate(section):
+        if line.strip() != marker:
+            continue
+        values: list[str] = []
+        for following in section[index + 1 :]:
+            if re.match(r"^\s*-\s*\*\*.+\*\*\s*$", following):
+                break
+            match = re.match(r"^\s{2,}-\s+(.+)$", following)
+            if match:
+                values.append(match.group(1).strip())
+            elif following.strip():
+                break
+        return values
+    return []
+
+
+def validate_scenarios(lines: list[str], *, v2: bool) -> list[str]:
     errors: list[str] = []
     scenario_indexes = [
         idx
@@ -182,6 +251,18 @@ def validate_scenarios(lines: list[str]) -> list[str]:
         elif not SCENARIO_HEADING_RE.match(heading):
             errors.append(f"invalid scenario heading → `{heading}`")
 
+        heading_match = SCENARIO_HEADING_RE.match(heading)
+        if heading_match:
+            scenario_id = heading_match.group(1)
+            outer_story = current_user_story(lines, start)
+            expected_story = scenario_user_story(scenario_id)
+            if outer_story is None:
+                errors.append(f"{heading}: missing outer `### US-n` heading")
+            elif outer_story != expected_story:
+                errors.append(
+                    f"{heading}: belongs to {expected_story}, not outer {outer_story}"
+                )
+
         block = current_proof_block(lines, start)
         if block is None:
             errors.append(f"{heading}: scenario must sit under ## 後端／前端／整合")
@@ -205,7 +286,9 @@ def validate_scenarios(lines: list[str]) -> list[str]:
             for line in section
             if (match := MAPPING_LABEL_RE.match(line))
         ]
-        required = REQUIRED_MAPPING_BY_BLOCK[block]
+        required = BASE_REQUIRED_MAPPING_BY_BLOCK[block]
+        if v2:
+            required += V2_REQUIRED_MAPPING_BY_BLOCK[block]
         for label in required:
             if label not in labels:
                 errors.append(
@@ -215,6 +298,51 @@ def validate_scenarios(lines: list[str]) -> list[str]:
             errors.append(
                 f"{heading}: under ## 整合, mapping must not include `**預期 TDD Red**`"
             )
+
+        if v2:
+            contract_values = mapping_values(section, "API 契約案例")
+            contract_ids = {
+                contract_id
+                for value in contract_values
+                for contract_id in re.findall(r"\bAPI-\d{3}-C\d+\b", value)
+            }
+            contract_not_applicable = contract_values == ["不適用"]
+            if not contract_ids and not contract_not_applicable:
+                errors.append(
+                    f"{heading}: `**API 契約案例**` must list contract IDs or exactly `不適用`"
+                )
+            section_text = "\n".join(section)
+            api_values = mapping_values(section, "API")
+            frontend_api_not_applicable = block == "前端" and api_values == ["不適用"]
+            uses_api = (
+                block in {"後端", "整合"}
+                or (block == "前端" and not frontend_api_not_applicable)
+                or bool(API_PATH_RE.search(section_text))
+                or "API Mock" in section_text
+            )
+            if uses_api and not contract_ids:
+                errors.append(f"{heading}: API Scenario must list at least one contract ID")
+            if block == "前端" and frontend_api_not_applicable != contract_not_applicable:
+                errors.append(
+                    f"{heading}: frontend `**API**` and `**API 契約案例**` must agree on `不適用`"
+                )
+
+            if block == "整合":
+                prerequisite_data = " ".join(mapping_values(section, "前置資料"))
+                if "可重置" not in prerequisite_data:
+                    errors.append(
+                        f"{heading}: integration 前置資料 must identify resettable test data"
+                    )
+                if mapping_values(section, "Mock") != ["停用"]:
+                    errors.append(f"{heading}: integration `**Mock**` must be exactly `停用`")
+                frontend_values = " ".join(mapping_values(section, "前端"))
+                if "真實執行期" not in frontend_values:
+                    errors.append(f"{heading}: integration 前端 must be 真實執行期頁面")
+                if mapping_values(section, "API") != ["正式 API"]:
+                    errors.append(f"{heading}: integration `**API**` must be exactly `正式 API`")
+                backend_values = " ".join(mapping_values(section, "後端"))
+                if "真實後端" not in backend_values:
+                    errors.append(f"{heading}: integration 後端 must be 真實後端")
 
     return errors
 
@@ -382,6 +510,58 @@ def collect_integration_us_ids(lines: list[str]) -> list[str]:
     return ids
 
 
+def validate_blocked_section(lines: list[str]) -> list[str]:
+    errors: list[str] = []
+    heading = "## 未產出 Scenario 的邊界（blocked）"
+    start = next(
+        (idx for idx, line in enumerate(lines) if line.strip() == heading),
+        None,
+    )
+    if start is None:
+        return errors
+
+    end = next(
+        (
+            idx
+            for idx in range(start + 1, len(lines))
+            if lines[idx].startswith("## ")
+        ),
+        len(lines),
+    )
+    section = lines[start + 1 : end]
+    header_index = next(
+        (
+            idx
+            for idx, line in enumerate(section)
+            if line.strip() == "| ID | 描述 | 阻塞原因 |"
+        ),
+        None,
+    )
+    if header_index is None:
+        return ["未產出 Scenario 的邊界（blocked）: missing three-column table"]
+
+    table_lines = [
+        line.strip()
+        for line in section[header_index + 1 :]
+        if line.strip().startswith("|")
+    ]
+    if not table_lines or table_lines[0] != "| --- | --- | --- |":
+        errors.append("未產出 Scenario 的邊界（blocked）: invalid table separator")
+        return errors
+
+    rows = table_lines[1:]
+    if not rows:
+        errors.append("未產出 Scenario 的邊界（blocked）: table must contain a row")
+        return errors
+    for row in rows:
+        cells = [cell.strip() for cell in row.strip("|").split("|")]
+        if len(cells) != 3 or any(not cell for cell in cells):
+            errors.append(
+                "未產出 Scenario 的邊界（blocked）: each row must contain ID / 描述 / 阻塞原因"
+            )
+    return errors
+
+
 def validate_assumption_section(lines: list[str]) -> list[str]:
     errors: list[str] = []
     start = next((idx for idx, line in enumerate(lines) if line.strip() == "## 假設"), None)
@@ -416,7 +596,43 @@ def validate_proof_block_order(lines: list[str]) -> list[str]:
     return errors
 
 
-def validate(path: Path) -> list[str]:
+def proof_block_text(lines: list[str], block: str) -> str:
+    start = next(
+        (idx for idx, line in enumerate(lines) if line.strip() == f"## {block}"),
+        None,
+    )
+    if start is None:
+        return ""
+    end = next(
+        (
+            idx
+            for idx in range(start + 1, len(lines))
+            if lines[idx].startswith("## ")
+        ),
+        len(lines),
+    )
+    return "\n".join(lines[start:end])
+
+
+def validate_v2_boundaries(lines: list[str]) -> list[str]:
+    errors: list[str] = []
+    backend = proof_block_text(lines, "後端")
+    frontend = proof_block_text(lines, "前端")
+    integration = proof_block_text(lines, "整合")
+    if "正式 API" not in backend or "可重置" not in backend:
+        errors.append("流程版本 2: 後端區塊必須明列正式 API 與可重置測試資料邊界")
+    if "前端瀏覽器端對端測試套件：" not in frontend:
+        errors.append("流程版本 2: 前端區塊必須記錄已選定的瀏覽器端對端測試套件")
+    if "執行期" not in frontend or "API Mock" not in frontend or "api-plan.md" not in frontend:
+        errors.append("流程版本 2: 前端區塊必須明列執行期頁面與 api-plan API Mock 邊界")
+    if "停用" not in integration or "Mock" not in integration or "真" not in integration:
+        errors.append("流程版本 2: 整合區塊必須明列停用 Mock 與真串接")
+    if has_mock_contradiction(integration):
+        errors.append("流程版本 2: 整合區塊不得另行保留、使用或重新啟用 Mock")
+    return errors
+
+
+def validate(path: Path, *, require_v2: bool = False) -> list[str]:
     if not path.exists():
         return [f"Input not found: {path}"]
 
@@ -438,11 +654,17 @@ def validate(path: Path) -> list[str]:
     if PLACEHOLDER_RE.search(content):
         errors.append("output still contains unreplaced {{PLACEHOLDER}} tokens")
 
+    has_v2_marker = any(FLOW_VERSION_RE.match(line.strip()) for line in lines[:12])
     errors.extend(validate_proof_block_order(lines))
     errors.extend(validate_us_headings(lines))
-    errors.extend(validate_scenarios(lines))
+    errors.extend(validate_scenarios(lines, v2=has_v2_marker or require_v2))
+    errors.extend(validate_blocked_section(lines))
     errors.extend(validate_summary_table(lines))
     errors.extend(validate_assumption_section(lines))
+    if require_v2 and not has_v2_marker:
+        errors.append("流程版本 2: missing `流程版本: 2` marker")
+    if has_v2_marker or require_v2:
+        errors.extend(validate_v2_boundaries(lines))
 
     blocks = extract_gherkin_blocks(lines)
     if not blocks:
@@ -457,7 +679,7 @@ def validate(path: Path) -> list[str]:
 def main() -> int:
     args = parse_args()
     path = Path(args.input)
-    errors = validate(path)
+    errors = validate(path, require_v2=args.require_v2)
 
     if errors:
         print(f"INVALID: {path}", file=sys.stderr)

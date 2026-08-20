@@ -5,7 +5,6 @@
 - 另依 `layer` 從 `specs/<plan-package>/system-analyze/` 持有 SA 片段：
   - `backend`：`api-plan.md`、`DDL.md`、`data-plan.md`
   - `frontend`：`ui-plan.md`、`data-plan.md`；寫 Mock 時另加 `api-plan.md`
-  - `integration`：`ui-plan.md`、`api-plan.md`、`data-plan.md`（不含 `DDL.md`）
 - 已持有的檔與區塊不得再整段重開。不得載入：`technical-research.md`、`spec.md`、`plan.md`、整份 `task-*.md`（受測行為已由 prompt 帶入）。
 
 ## Good Example
@@ -31,6 +30,8 @@ layer=backend, 本則=S-1-1
 - Level: `MUST`
 - 對 SA 檔不得整檔通讀；只讀受測行為（與 e2e 對應欄位）點名到的 endpoint、頁面、實體或其他介面元素。
 - 測試必須只打「打」、只看「看」寫明的正式介面（執行期畫面或正式 API）。
+- `backend` 必須由正式 API 進入真後端與可重設測試資料；不得直接呼叫內部 service 或直接查資料表取代端對端證據。
+- `frontend` 必須使用 technical research／plan 已選定的瀏覽器端對端套件開啟執行期前端；API 只能在邊界依交接中的 `api-plan.md` 契約案例建立 Mock。jsdom 元件測試可補充，但不能充當本 Scenario 主證據。
 - **禁止**把 `system-analyze/ui/*.html` 或其他雛形檔當受測物或測試入口。
 - 寫測時若斷言仍缺形狀／欄位／狀態碼等細節，可再手術式補讀**相關**契約片段；不可借機通讀無關章節。
 

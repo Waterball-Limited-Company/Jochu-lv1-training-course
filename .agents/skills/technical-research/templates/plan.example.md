@@ -3,6 +3,7 @@
 **功能分支**: `001-photo-albums`
 **建立日期**: 2026-07-21
 **狀態**: 草稿
+流程版本: 2
 
 ## 摘要
 
@@ -36,7 +37,8 @@
 ### 測試環境
 
 - Backend：Node.js 內建 `node:test`（API 合約／整合測試；實作暫定）
-- Frontend／端到端：以同 package 的 `e2e-test-plan.md` 與手動驗收為主
+- 前端瀏覽器端對端：Playwright 開啟 Vite 執行期頁面；前端 Scenario 依 `api-plan.md` 攔截 API，完全端對端停用 Mock 並連真後端
+- Frontend 輔助測試：需要時用 Vitest 驗證純函式；不取代 Playwright Scenario
 - 規格層：`e2e-test-plan.md` 作為端到端情境來源
 
 ### 開發平台
@@ -119,6 +121,7 @@ backend/
 └── package.json
 
 frontend/
+├── playwright.config.js             # 前端 Scenario 與完全端對端瀏覽器設定
 ├── index.html                       # 單頁 App 進入點
 ├── src/
 │   ├── main.js                      # 進入點：載入、渲染、事件綁定
@@ -126,7 +129,10 @@ frontend/
 │   ├── render.js                    # 主頁日期分組、相簿平鋪、照片庫列表
 │   ├── dnd.js                       # 原生 HTML Drag and Drop（同分組內重排）
 │   └── styles.css                   # 分組、平鋪預覽、拖放中樣式
-└── package.json                     # Vite 開發依賴
+├── tests/
+│   ├── scenarios/                   # 前端 Scenario；API 依契約 Mock
+│   └── system/                      # 停用 Mock 的 User Story 完全端對端
+└── package.json                     # Vite 與 Playwright 開發依賴
 ```
 
 ### 結構決策
